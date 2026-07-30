@@ -1,9 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/dev_community
-    username: root
-    password: 1234
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-jwt:
-  secret: "I1vD1hq6TeJuYwlWMpLJzknbWqiy5Yavq00XlETOZ39zjLJ4UpvkXxXqjhmcsaqU"
