@@ -12,11 +12,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-// Spring Security 7(Boot 4) 기준: authorizeRequests()는 제거되어 authorizeHttpRequests()만 사용.
-// stateless JWT API이므로 CSRF는 명시적으로 비활성화해야 함(7부터 API에도 기본 활성화됨).
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    private static final String UNAUTHORIZED_BODY =
+            "{\"success\":false,\"data\":null,\"message\":\"인증이 필요합니다.\",\"code\":\"UNAUTHORIZED\"}";
+    private static final String FORBIDDEN_BODY =
+            "{\"success\":false,\"data\":null,\"message\":\"접근 권한이 없습니다.\",\"code\":\"FORBIDDEN\"}";
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -32,10 +35,23 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**",
+                                "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/questions/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(401);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(UNAUTHORIZED_BODY);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(403);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(FORBIDDEN_BODY);
+                        })
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
