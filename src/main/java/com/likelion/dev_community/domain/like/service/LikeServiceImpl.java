@@ -1,7 +1,7 @@
 package com.likelion.dev_community.domain.like.service;
 
 import com.likelion.dev_community.common.exception.ErrorCode;
-import com.likelion.dev_community.common.exception.ResourceNotFoundException;
+import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.domain.answer.entity.Answer;
 import com.likelion.dev_community.domain.answer.repository.AnswerRepository;
 import com.likelion.dev_community.domain.like.entity.LikeHistory;
@@ -35,7 +35,7 @@ public class LikeServiceImpl implements LikeService {
     @Override
     public boolean toggleLike(Long userId, LikeTargetType targetType, Long targetId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
         return likeHistoryRepository
                 .findByUserIdAndTargetTypeAndTargetId(userId, targetType, targetId)
@@ -62,11 +62,11 @@ public class LikeServiceImpl implements LikeService {
     private void increaseCount(LikeTargetType targetType, Long targetId) {
         if (targetType == LikeTargetType.QUESTION) {
             Question question = questionRepository.findById(targetId)
-                    .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND.getMessage()));
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
             question.increaseLikeCount();
         } else {
             Answer answer = answerRepository.findById(targetId)
-                    .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.NOT_FOUND.getMessage()));
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
             answer.increaseLikeCount();
         }
     }
