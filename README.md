@@ -1,5 +1,2 @@
 # dev_community
-멋쟁이사자처럼 백엔드 24기 기초/응용 프로젝트
-
-jwt:
-secret: "I1vD1hq6TeJuYwlWMpLJzknbWqiy5Yavq00XlETOZ39zjLJ4UpvkXxXqjhmcsaqU"
+멋쟁이사자처럼 백엔드 24기 기초/응용 4조 프로젝트
