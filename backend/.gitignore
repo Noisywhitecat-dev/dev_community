@@ -40,4 +40,3 @@ application-local.yml
 *.log
 
 .env
-CLAUDE.md

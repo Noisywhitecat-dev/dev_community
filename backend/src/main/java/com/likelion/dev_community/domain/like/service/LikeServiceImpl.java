@@ -15,13 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// ⑤ likeCount 갱신 트랜잭션 경계
-// insert/delete(likes)와 Question·Answer.likeCount 증감을
-// 같은 @Transactional 메서드 안에서 처리한다.
-// 이렇게 하지 않으면, 두 작업 사이에 서버가 죽거나 예외가 나는 경우
-// "좋아요 기록은 있는데 카운트는 안 늘어난" 상태로 데이터가 어긋난다.
-// 클래스 레벨에 @Transactional을 걸어 이 클래스의 모든 메서드가
-// 기본적으로 하나의 트랜잭션으로 묶이게 한다.
 @Service
 @RequiredArgsConstructor
 @Transactional

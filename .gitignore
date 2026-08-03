@@ -1,4 +1,3 @@
-# 루트에 남은 예전 빌드 산출물/IDE 설정 (backend/로 이동 후 여기서 다시 생기지 않음)
 .idea/
 .gradle/
 build/
