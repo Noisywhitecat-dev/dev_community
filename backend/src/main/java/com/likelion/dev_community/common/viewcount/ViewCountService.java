@@ -1,0 +1,6 @@
+package com.likelion.dev_community.common.viewcount;
+
+public interface ViewCountService {
+
+    boolean shouldIncrease(Long questionId, String viewerKey);
+}
