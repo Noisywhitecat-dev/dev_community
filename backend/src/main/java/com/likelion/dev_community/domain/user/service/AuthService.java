@@ -110,4 +110,20 @@ public class AuthService {
 
         return ReissueResponse.of(newAccessToken);
     }
+
+    @Transactional
+    public void logout(Long userId, HttpServletResponse httpServletResponse){
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken",null)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        refreshTokenRepository.deleteByUserId(userId);
+    }
 }

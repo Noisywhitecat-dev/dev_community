@@ -5,11 +5,13 @@ import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
 import com.likelion.dev_community.domain.user.dto.*;
 import com.likelion.dev_community.domain.user.service.AuthService;
+import com.likelion.dev_community.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,5 +44,12 @@ public class AuthController {
         ReissueResponse reissueResponse = authService.reissue(refreshToken);
 
         return ResponseEntity.ok(ApiResponse.success("토큰 재발급 성공",reissueResponse));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletResponse httpServletResponse){
+        authService.logout(userDetails.getId(), httpServletResponse);
+
+        return ResponseEntity.ok(ApiResponse.success("로그아웃 성공",null));
     }
 }
