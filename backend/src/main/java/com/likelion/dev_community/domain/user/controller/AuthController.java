@@ -1,10 +1,7 @@
 package com.likelion.dev_community.domain.user.controller;
 
 import com.likelion.dev_community.common.ApiResponse;
-import com.likelion.dev_community.domain.user.dto.SignInRequest;
-import com.likelion.dev_community.domain.user.dto.SignUpRequest;
-import com.likelion.dev_community.domain.user.dto.SignUpResponse;
-import com.likelion.dev_community.domain.user.dto.TokenResponse;
+import com.likelion.dev_community.domain.user.dto.*;
 import com.likelion.dev_community.domain.user.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +31,12 @@ public class AuthController {
         TokenResponse tokenResponse = authService.signIn(request);
 
         return ResponseEntity.ok(ApiResponse.success("로그인 성공",tokenResponse));
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<ApiResponse<ReissueResponse>> reissue(@Valid @RequestBody ReissueRequest request){
+        ReissueResponse reissueResponse = authService.reissue(request);
+
+        return ResponseEntity.ok(ApiResponse.success("토큰 재발급 성공",reissueResponse));
     }
 }

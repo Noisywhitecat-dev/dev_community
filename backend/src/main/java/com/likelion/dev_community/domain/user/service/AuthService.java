@@ -2,15 +2,15 @@ package com.likelion.dev_community.domain.user.service;
 
 import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
-import com.likelion.dev_community.domain.user.dto.SignInRequest;
-import com.likelion.dev_community.domain.user.dto.SignUpRequest;
-import com.likelion.dev_community.domain.user.dto.SignUpResponse;
-import com.likelion.dev_community.domain.user.dto.TokenResponse;
+import com.likelion.dev_community.domain.user.dto.*;
 import com.likelion.dev_community.domain.user.entity.RefreshToken;
 import com.likelion.dev_community.domain.user.entity.User;
 import com.likelion.dev_community.domain.user.repository.RefreshTokenRepository;
 import com.likelion.dev_community.domain.user.repository.UserRepository;
 import com.likelion.dev_community.security.JwtProvider;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -56,11 +56,44 @@ public class AuthService {
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword()))
             throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
 
+        refreshTokenRepository.deleteByUserId(user.getId());
+
         String accessToken = jwtProvider.createAccessToken(user.getId(), user.getUsername(), user.getNickname(), List.of(user.getRole().name()));
         String refreshToken = jwtProvider.createRefreshToken(user.getId());
 
         refreshTokenRepository.save(new RefreshToken(user.getId(),refreshToken,jwtProvider.getRefreshTokenExpirationMs()));
 
         return TokenResponse.of(accessToken, refreshToken);
+    }
+
+    @Transactional
+    public ReissueResponse reissue(ReissueRequest request){
+
+        Claims claims;
+
+        try {
+            claims = jwtProvider.parseRefreshToken(request.getRefreshToken());
+        }
+        catch (ExpiredJwtException e){
+            throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
+        }
+        catch (JwtException e){
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        Long userId = Long.valueOf(claims.getSubject());
+
+        RefreshToken savedToken = refreshTokenRepository.findByUserId(userId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_REFRESH_TOKEN));
+
+        if(!savedToken.getRefreshToken().equals(request.getRefreshToken()))
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_REFRESH_TOKEN));
+
+        String newAccessToken = jwtProvider.createAccessToken(
+                user.getId(), user.getUsername(), user.getNickname(), List.of(user.getRole().name())
+        );
+
+        return ReissueResponse.of(newAccessToken);
     }
 }
