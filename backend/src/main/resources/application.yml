@@ -9,3 +9,7 @@ spring:
 jwt:
   expirationMs: 900000
   refreshExpirationMs: 1209600000
+
+cookie:
+  secure:
+    false

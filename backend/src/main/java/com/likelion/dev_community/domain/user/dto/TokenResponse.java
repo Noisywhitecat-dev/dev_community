@@ -8,10 +8,9 @@ import lombok.Getter;
 @Getter
 public class TokenResponse {
     private final String accessToken;
-    private final String refreshToken;
     private final String tokenType;
 
-    public static TokenResponse of(String accessToken, String refreshToken){
-        return new TokenResponse(accessToken,refreshToken,"Bearer ");
+    public static TokenResponse of(String accessToken){
+        return new TokenResponse(accessToken,"Bearer ");
     }
 }

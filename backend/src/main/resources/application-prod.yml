@@ -21,3 +21,7 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
   refreshSecret: ${JWT_REFRESH}
+
+cookie:
+  secure:
+    true
