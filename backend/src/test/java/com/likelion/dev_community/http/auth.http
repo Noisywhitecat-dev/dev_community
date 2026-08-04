@@ -19,7 +19,6 @@ Content-Type: application/json
 
 > {%
     client.global.set("accessToken", response.body.data.accessToken);
-    client.global.set("refreshToken", response.body.data.refreshToken);
 %}
 
 ### 잘못된 비밀번호로 로그인 (401)
@@ -31,18 +30,10 @@ Content-Type: application/json
   "password": "wrongpassword"
 }
 
-### 재발급 요청 (성공)
+### 재발급 요청 (성공) - 로그인 때 받은 쿠키가 자동으로 실림
 POST http://localhost:8080/api/auth/reissue
-Content-Type: application/json
 
-{
-  "refreshToken": "{{refreshToken}}"
-}
-
-### 재발급 요청 (실패)
+### 재발급 요청 (실패) - 잘못된 값으로 쿠키를 직접 덮어씀
 POST http://localhost:8080/api/auth/reissue
-Content-Type: application/json
+Cookie: refreshToken=aaa
 
-{
-  "refreshToken": "aaa"
-}
