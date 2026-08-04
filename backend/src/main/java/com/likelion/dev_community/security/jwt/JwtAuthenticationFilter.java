@@ -1,5 +1,6 @@
-package com.likelion.dev_community.security;
+package com.likelion.dev_community.security.jwt;
 
+import com.likelion.dev_community.security.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;

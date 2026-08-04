@@ -1,4 +1,4 @@
-package com.likelion.dev_community.security;
+package com.likelion.dev_community.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
