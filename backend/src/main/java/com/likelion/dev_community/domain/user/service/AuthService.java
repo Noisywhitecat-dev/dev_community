@@ -7,7 +7,7 @@ import com.likelion.dev_community.domain.user.entity.RefreshToken;
 import com.likelion.dev_community.domain.user.entity.User;
 import com.likelion.dev_community.domain.user.repository.RefreshTokenRepository;
 import com.likelion.dev_community.domain.user.repository.UserRepository;
-import com.likelion.dev_community.security.JwtProvider;
+import com.likelion.dev_community.security.jwt.JwtProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -120,8 +120,7 @@ public class AuthService {
         refreshTokenRepository.deleteByUserId(userId);
     }
 
-    private
-    ResponseCookie buildCookie(String name, String value, Duration expiration){
+    private ResponseCookie buildCookie(String name, String value, Duration expiration){
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(cookieSecure)

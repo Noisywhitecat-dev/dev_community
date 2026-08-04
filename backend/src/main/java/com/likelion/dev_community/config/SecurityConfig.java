@@ -1,6 +1,9 @@
 package com.likelion.dev_community.config;
 
-import com.likelion.dev_community.security.JwtAuthenticationFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.likelion.dev_community.security.handler.RestAccessDeniedHandler;
+import com.likelion.dev_community.security.handler.RestAuthenticationEntryPoint;
+import com.likelion.dev_community.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,12 +22,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private static final String UNAUTHORIZED_BODY =
-            "{\"success\":false,\"data\":null,\"message\":\"인증이 필요합니다.\",\"code\":\"UNAUTHORIZED\"}";
-    private static final String FORBIDDEN_BODY =
-            "{\"success\":false,\"data\":null,\"message\":\"접근 권한이 없습니다.\",\"code\":\"FORBIDDEN\"}";
-
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RestAccessDeniedHandler restAccessDeniedHandler;
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -48,16 +48,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(401);
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write(UNAUTHORIZED_BODY);
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(403);
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write(FORBIDDEN_BODY);
-                        })
+                        .accessDeniedHandler(restAccessDeniedHandler)
+                        .authenticationEntryPoint(restAuthenticationEntryPoint)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
