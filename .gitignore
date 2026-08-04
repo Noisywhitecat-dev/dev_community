@@ -41,3 +41,4 @@ application-local.yml
 
 .env
 CLAUDE.md
+dev-community-key.pem
