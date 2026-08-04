@@ -37,3 +37,9 @@ POST http://localhost:8080/api/auth/reissue
 POST http://localhost:8080/api/auth/reissue
 Cookie: refreshToken=aaa
 
+### 로그아웃 (성공)
+POST http://localhost:8080/api/auth/logout
+Authorization: Bearer {{accessToken}}
+
+### 로그아웃 (실패)
+POST http://localhost:8080/api/auth/logout
