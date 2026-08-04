@@ -1,10 +1,11 @@
 package com.likelion.dev_community.domain.user.dto;
 
 import com.likelion.dev_community.domain.user.entity.User;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class SignUpResponse {
     private final Long userId;
