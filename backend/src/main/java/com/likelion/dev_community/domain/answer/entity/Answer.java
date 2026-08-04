@@ -1,0 +1,81 @@
+package com.likelion.dev_community.domain.answer.entity;
+
+import com.likelion.dev_community.common.entity.BaseTimeEntity;
+import com.likelion.dev_community.domain.answer.exception.AdoptedAnswerDeletionException;
+import com.likelion.dev_community.domain.question.entity.Question;
+import com.likelion.dev_community.domain.user.entity.User;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Entity
+@Table(name = "answers")
+@SQLRestriction("deleted_at is null")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Answer extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
+
+    @Column(nullable = false)
+    private boolean isAdopted;
+
+    @Column(nullable = false)
+    private int likeCount;
+
+    private LocalDateTime deletedAt;
+
+    @Builder
+    public Answer(Question question, User author, String content) {
+        this.question = question;
+        this.author = author;
+        this.content = content;
+        this.isAdopted = false;
+        this.likeCount = 0;
+    }
+
+    public void update(String content) {
+        this.content = content;
+    }
+
+    public void softDelete() {
+        if (this.isAdopted) {
+            throw new AdoptedAnswerDeletionException();
+        }
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public void adopt() {
+        this.isAdopted = true;
+    }
+
+    public void cancelAdoption() {
+        this.isAdopted = false;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount = Math.max(0, this.likeCount - 1);
+    }
+}
