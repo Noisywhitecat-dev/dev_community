@@ -1,5 +1,6 @@
-package com.likelion.dev_community.security;
+package com.likelion.dev_community.security.jwt;
 
+import com.likelion.dev_community.security.CustomUserDetails;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
