@@ -1,12 +1,13 @@
 # 1단계: 빌드
 FROM gradle:8-jdk21 AS build
 WORKDIR /app
-COPY . .
+COPY backend/ .
 RUN ./gradlew clean bootJar -x test
 
 # 2단계: 실행
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
+ENV TZ=Asia/Seoul
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx400m", "-jar", "app.jar"]
