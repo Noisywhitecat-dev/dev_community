@@ -13,6 +13,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +31,10 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+
+
+    @Value("${cookie.secure}")
+    private boolean cookieSecure;
 
     // 회원가입
     @Transactional
@@ -67,13 +72,7 @@ public class AuthService {
 
         refreshTokenRepository.save(new RefreshToken(user.getId(),refreshToken,jwtProvider.getRefreshTokenExpirationMs()));
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Strict")
-                .path("/")
-                .maxAge(Duration.ofMillis(jwtProvider.getRefreshTokenExpirationMs()))
-                .build();
+        ResponseCookie cookie = buildCookie("refreshToken",refreshToken, Duration.ofMillis(jwtProvider.getRefreshTokenExpirationMs()));
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
@@ -114,16 +113,21 @@ public class AuthService {
     @Transactional
     public void logout(Long userId, HttpServletResponse httpServletResponse){
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken",null)
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Strict")
-                .path("/")
-                .maxAge(0)
-                .build();
+        ResponseCookie cookie = buildCookie("refreshToken", null, Duration.ZERO);
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         refreshTokenRepository.deleteByUserId(userId);
+    }
+
+    private
+    ResponseCookie buildCookie(String name, String value, Duration expiration){
+        return ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(expiration)
+                .build();
     }
 }
