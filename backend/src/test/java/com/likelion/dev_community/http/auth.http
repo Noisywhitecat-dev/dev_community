@@ -30,3 +30,19 @@ Content-Type: application/json
   "username": "testuser01",
   "password": "wrongpassword"
 }
+
+### 재발급 요청 (성공)
+POST http://localhost:8080/api/auth/reissue
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### 재발급 요청 (실패)
+POST http://localhost:8080/api/auth/reissue
+Content-Type: application/json
+
+{
+  "refreshToken": "aaa"
+}

@@ -1,16 +1,16 @@
 package com.likelion.dev_community.domain.user.controller;
 
 import com.likelion.dev_community.common.ApiResponse;
+import com.likelion.dev_community.common.exception.CustomException;
+import com.likelion.dev_community.common.exception.ErrorCode;
 import com.likelion.dev_community.domain.user.dto.*;
 import com.likelion.dev_community.domain.user.service.AuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,15 +27,19 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<TokenResponse>> login(@Valid @RequestBody SignInRequest request){
-        TokenResponse tokenResponse = authService.signIn(request);
+    public ResponseEntity<ApiResponse<TokenResponse>> login(@Valid @RequestBody SignInRequest request, HttpServletResponse httpServletResponse){
+        TokenResponse tokenResponse = authService.signIn(request, httpServletResponse);
 
         return ResponseEntity.ok(ApiResponse.success("로그인 성공",tokenResponse));
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<ReissueResponse>> reissue(@Valid @RequestBody ReissueRequest request){
-        ReissueResponse reissueResponse = authService.reissue(request);
+    public ResponseEntity<ApiResponse<ReissueResponse>> reissue(@CookieValue(value = "refreshToken", required = false) String refreshToken){
+
+        if(refreshToken==null)
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
+
+        ReissueResponse reissueResponse = authService.reissue(refreshToken);
 
         return ResponseEntity.ok(ApiResponse.success("토큰 재발급 성공",reissueResponse));
     }

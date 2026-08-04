@@ -11,11 +11,15 @@ import com.likelion.dev_community.security.JwtProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.List;
 
 @Service
@@ -50,7 +54,7 @@ public class AuthService {
 
     // 로그인
     @Transactional
-    public TokenResponse signIn(SignInRequest request){
+    public TokenResponse signIn(SignInRequest request, HttpServletResponse httpServletResponse){
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new CustomException(ErrorCode.INVALID_CREDENTIALS));
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword()))
@@ -63,16 +67,26 @@ public class AuthService {
 
         refreshTokenRepository.save(new RefreshToken(user.getId(),refreshToken,jwtProvider.getRefreshTokenExpirationMs()));
 
-        return TokenResponse.of(accessToken, refreshToken);
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofMillis(jwtProvider.getRefreshTokenExpirationMs()))
+                .build();
+
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return TokenResponse.of(accessToken);
     }
 
     @Transactional
-    public ReissueResponse reissue(ReissueRequest request){
+    public ReissueResponse reissue(String refreshToken){
 
         Claims claims;
 
         try {
-            claims = jwtProvider.parseRefreshToken(request.getRefreshToken());
+            claims = jwtProvider.parseRefreshToken(refreshToken);
         }
         catch (ExpiredJwtException e){
             throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
@@ -85,7 +99,7 @@ public class AuthService {
 
         RefreshToken savedToken = refreshTokenRepository.findByUserId(userId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_REFRESH_TOKEN));
 
-        if(!savedToken.getRefreshToken().equals(request.getRefreshToken()))
+        if(!savedToken.getRefreshToken().equals(refreshToken))
             throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
 
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_REFRESH_TOKEN));
