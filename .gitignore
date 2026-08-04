@@ -40,5 +40,4 @@ application-local.yml
 *.log
 
 .env
-CLAUDE.md
 dev-community-key.pem
