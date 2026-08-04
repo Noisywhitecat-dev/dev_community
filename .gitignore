@@ -3,3 +3,5 @@
 build/
 .env
 dev-community-key.pem
+application-local.yml
+*.iml
