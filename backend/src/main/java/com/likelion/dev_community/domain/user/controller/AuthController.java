@@ -3,7 +3,7 @@ package com.likelion.dev_community.domain.user.controller;
 import com.likelion.dev_community.common.ApiResponse;
 import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
-import com.likelion.dev_community.domain.user.dto.*;
+import com.likelion.dev_community.domain.user.dto.authDto.*;
 import com.likelion.dev_community.domain.user.service.AuthService;
 import com.likelion.dev_community.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletResponse;

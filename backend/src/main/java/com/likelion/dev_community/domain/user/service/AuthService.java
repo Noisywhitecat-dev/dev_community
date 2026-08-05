@@ -2,7 +2,7 @@ package com.likelion.dev_community.domain.user.service;
 
 import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
-import com.likelion.dev_community.domain.user.dto.*;
+import com.likelion.dev_community.domain.user.dto.authDto.*;
 import com.likelion.dev_community.domain.user.entity.RefreshToken;
 import com.likelion.dev_community.domain.user.entity.User;
 import com.likelion.dev_community.domain.user.repository.RefreshTokenRepository;
