@@ -10,7 +10,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class QuestionListResponse {
+public class QuestionSummaryResponse {
 
     private final Long id;
     private final String title;
@@ -24,8 +24,8 @@ public class QuestionListResponse {
     private final List<String> tags;
     private final LocalDateTime createdAt;
 
-    public static QuestionListResponse of(Question question, int answerCount, List<String> tags) {
-        return new QuestionListResponse(
+    public static QuestionSummaryResponse of(Question question, int answerCount, List<String> tags) {
+        return new QuestionSummaryResponse(
                 question.getId(),
                 question.getTitle(),
                 question.getAuthor().getNickname(),

@@ -1,7 +1,7 @@
 package com.likelion.dev_community.domain.question.controller;
 
 import com.likelion.dev_community.common.ApiResponse;
-import com.likelion.dev_community.domain.question.dto.QuestionListResponse;
+import com.likelion.dev_community.domain.question.dto.QuestionSummaryResponse;
 import com.likelion.dev_community.domain.question.dto.QuestionRequest;
 import com.likelion.dev_community.domain.question.dto.QuestionResponse;
 import com.likelion.dev_community.domain.question.service.QuestionService;
@@ -38,12 +38,12 @@ public class QuestionController {
 
     // F-07
     @GetMapping
-    public ResponseEntity<ApiResponse<List<QuestionListResponse>>> readQuestions(
+    public ResponseEntity<ApiResponse<List<QuestionSummaryResponse>>> readQuestions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sort
     ) {
-        Page<QuestionListResponse> result = questionService.readQuestions(page, size, sort);
+        Page<QuestionSummaryResponse> result = questionService.readQuestions(page, size, sort);
 
         Map<String, Object> meta = Map.of(
                 "page", result.getNumber(),

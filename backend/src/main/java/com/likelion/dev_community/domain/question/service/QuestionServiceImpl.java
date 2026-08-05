@@ -3,7 +3,7 @@ package com.likelion.dev_community.domain.question.service;
 import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
 import com.likelion.dev_community.common.xss.XssSanitizer;
-import com.likelion.dev_community.domain.question.dto.QuestionListResponse;
+import com.likelion.dev_community.domain.question.dto.QuestionSummaryResponse;
 import com.likelion.dev_community.domain.question.dto.QuestionRequest;
 import com.likelion.dev_community.domain.question.dto.QuestionResponse;
 import com.likelion.dev_community.domain.question.entity.Question;
@@ -59,7 +59,7 @@ public class QuestionServiceImpl implements QuestionService {
     // F-07
     @Override
     @Transactional(readOnly = true)
-    public Page<QuestionListResponse> readQuestions(int page, int size, String sort) {
+    public Page<QuestionSummaryResponse> readQuestions(int page, int size, String sort) {
 
         if (page < 0) {
             throw new CustomException(ErrorCode.INVALID_INPUT, "page는 0 이상이어야 합니다.");
@@ -91,7 +91,7 @@ public class QuestionServiceImpl implements QuestionService {
                         Collectors.mapping(qt -> qt.getTag().getName(), Collectors.toList())
                 ));
 
-        return questions.map(question -> QuestionListResponse.of(
+        return questions.map(question -> QuestionSummaryResponse.of(
                 question,
                 0, // 답변 작성 구현 후에 수정
                 tagMap.getOrDefault(question.getId(), Collections.emptyList())
