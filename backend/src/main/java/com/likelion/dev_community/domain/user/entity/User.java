@@ -52,4 +52,8 @@ public class User extends BaseTimeEntity {
                 .status(UserStatus.ACTIVE)
                 .build();
     }
+
+    public void updateUser(String nickname){
+        this.nickname = nickname;
+    }
 }
