@@ -5,6 +5,7 @@ import com.likelion.dev_community.common.exception.ErrorCode;
 import com.likelion.dev_community.domain.user.dto.authDto.*;
 import com.likelion.dev_community.domain.user.entity.RefreshToken;
 import com.likelion.dev_community.domain.user.entity.User;
+import com.likelion.dev_community.domain.user.entity.UserStatus;
 import com.likelion.dev_community.domain.user.repository.RefreshTokenRepository;
 import com.likelion.dev_community.domain.user.repository.UserRepository;
 import com.likelion.dev_community.security.jwt.CookieProvider;
@@ -34,10 +35,6 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final CookieProvider cookieProvider;
 
-
-    @Value("${cookie.secure}")
-    private boolean cookieSecure;
-
     // 회원가입
     @Transactional
     public SignUpResponse signUp(SignUpRequest request){
@@ -65,6 +62,9 @@ public class AuthService {
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new CustomException(ErrorCode.INVALID_CREDENTIALS));
 
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword()))
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
+
+        if(user.getStatus() == UserStatus.WITHDRAWN)
             throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
 
         refreshTokenRepository.deleteByUserId(user.getId());

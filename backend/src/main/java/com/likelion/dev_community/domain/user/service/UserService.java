@@ -65,6 +65,22 @@ public class UserService {
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
+    // 회원 탈퇴
+    @Transactional
+    public void deleteUser(Long userId, String currentPassword, HttpServletResponse httpServletResponse){
+        User user = findUserById(userId);
+
+        if(!passwordEncoder.matches(currentPassword, user.getPassword()))
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
+
+        user.withdraw(); // 사용자 상태 withdrawn
+
+        refreshTokenRepository.deleteByUserId(userId);
+
+        ResponseCookie cookie = cookieProvider.clearCookie("refreshToken");
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
     public User findUserById(Long userId){
         return userRepository.findById(userId).orElseThrow(()->new CustomException(ErrorCode.NOT_FOUND, "유저를 찾을 수 없습니다. "+userId));
     }
