@@ -1,0 +1,29 @@
+package com.likelion.dev_community.domain.user.dto.userDto;
+
+import com.likelion.dev_community.domain.user.entity.Role;
+import com.likelion.dev_community.domain.user.entity.User;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
+public class UserInfoResponse {
+    private final Long userId;
+    private final String username;
+    private final String nickname;
+    private final Role role;
+    private final LocalDateTime createdAt;
+
+    public static UserInfoResponse from(User user){
+        return new UserInfoResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getNickname(),
+                user.getRole(),
+                user.getCreatedAt()
+        );
+    }
+}

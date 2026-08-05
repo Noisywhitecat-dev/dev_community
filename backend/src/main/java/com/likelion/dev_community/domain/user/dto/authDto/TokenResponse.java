@@ -1,4 +1,4 @@
-package com.likelion.dev_community.domain.user.dto;
+package com.likelion.dev_community.domain.user.dto.authDto;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
