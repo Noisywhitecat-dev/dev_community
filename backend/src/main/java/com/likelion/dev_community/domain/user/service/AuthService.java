@@ -7,6 +7,7 @@ import com.likelion.dev_community.domain.user.entity.RefreshToken;
 import com.likelion.dev_community.domain.user.entity.User;
 import com.likelion.dev_community.domain.user.repository.RefreshTokenRepository;
 import com.likelion.dev_community.domain.user.repository.UserRepository;
+import com.likelion.dev_community.security.jwt.CookieProvider;
 import com.likelion.dev_community.security.jwt.JwtProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -31,6 +32,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final CookieProvider cookieProvider;
 
 
     @Value("${cookie.secure}")
@@ -72,7 +74,7 @@ public class AuthService {
 
         refreshTokenRepository.save(new RefreshToken(user.getId(),refreshToken,jwtProvider.getRefreshTokenExpirationMs()));
 
-        ResponseCookie cookie = buildCookie("refreshToken",refreshToken, Duration.ofMillis(jwtProvider.getRefreshTokenExpirationMs()));
+        ResponseCookie cookie = cookieProvider.createCookie("refreshToken",refreshToken, Duration.ofMillis(jwtProvider.getRefreshTokenExpirationMs()));
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
@@ -113,20 +115,10 @@ public class AuthService {
     @Transactional
     public void logout(Long userId, HttpServletResponse httpServletResponse){
 
-        ResponseCookie cookie = buildCookie("refreshToken", null, Duration.ZERO);
+        ResponseCookie cookie = cookieProvider.clearCookie("refreshToken");
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         refreshTokenRepository.deleteByUserId(userId);
-    }
-
-    private ResponseCookie buildCookie(String name, String value, Duration expiration){
-        return ResponseCookie.from(name, value)
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .sameSite("Strict")
-                .path("/")
-                .maxAge(expiration)
-                .build();
     }
 }
