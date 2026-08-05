@@ -8,15 +8,18 @@ import com.likelion.dev_community.domain.user.service.AuthService;
 import com.likelion.dev_community.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@Validated
 public class AuthController {
 
     private final AuthService authService;
@@ -51,5 +54,19 @@ public class AuthController {
         authService.logout(userDetails.getId(), httpServletResponse);
 
         return ResponseEntity.ok(ApiResponse.success("로그아웃 성공",null));
+    }
+
+    @GetMapping("/check-username")
+    public ResponseEntity<ApiResponse<Void>> checkUsername(@RequestParam @NotBlank String username){
+        authService.checkUsername(username);
+
+        return ResponseEntity.ok(ApiResponse.success("사용 가능한 아이디입니다", null));
+    }
+
+    @GetMapping("/check-nickname")
+    public ResponseEntity<ApiResponse<Void>> checkNickname(@RequestParam @NotBlank String nickname){
+        authService.checkNickname(nickname);
+
+        return ResponseEntity.ok(ApiResponse.success("사용 가능한 닉네임입니다", null));
     }
 }
