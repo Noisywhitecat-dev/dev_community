@@ -17,3 +17,57 @@ Authorization: Bearer {{accessToken}}
 
 ### 회원 정보 조회 (실패)
 GET http://localhost:8080/api/members/me
+
+### 회원 정보 수정 (성공) - 닉네임 변경
+PUT http://localhost:8080/api/members/me
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "nickname": "수정된닉네임"
+}
+
+### 회원 정보 수정 (성공) - 본인 닉네임 그대로 재제출 (중복 체크에 안 걸려야 함)
+PUT http://localhost:8080/api/members/me
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "nickname": "수정된닉네임"
+}
+
+### 회원 정보 수정 (실패) - 토큰 없이 요청 (401)
+PUT http://localhost:8080/api/members/me
+Content-Type: application/json
+
+{
+  "nickname": "닉네임변경시도"
+}
+
+### 회원 정보 수정 (실패) - 닉네임 공백 (400)
+PUT http://localhost:8080/api/members/me
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "nickname": ""
+}
+
+### 닉네임 중복 테스트용 계정 가입
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "username": "testuser02",
+  "password": "password123",
+  "nickname": "중복테스트닉네임"
+}
+
+### 회원 정보 수정 (실패) - 다른 사람이 이미 쓰는 닉네임 (409)
+PUT http://localhost:8080/api/members/me
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "nickname": "중복테스트닉네임"
+}
