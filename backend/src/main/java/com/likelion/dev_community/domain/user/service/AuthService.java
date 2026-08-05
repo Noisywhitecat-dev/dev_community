@@ -15,7 +15,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -81,6 +80,7 @@ public class AuthService {
         return TokenResponse.of(accessToken);
     }
 
+    // 토큰 재발급
     @Transactional
     public ReissueResponse reissue(String refreshToken){
 
@@ -112,6 +112,7 @@ public class AuthService {
         return ReissueResponse.of(newAccessToken);
     }
 
+    // 로그아웃
     @Transactional
     public void logout(Long userId, HttpServletResponse httpServletResponse){
 
@@ -120,5 +121,19 @@ public class AuthService {
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         refreshTokenRepository.deleteByUserId(userId);
+    }
+
+    // 아이디 중복 확인
+    @Transactional(readOnly = true)
+    public void checkUsername(String username){
+        if(userRepository.existsByUsername(username))
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "사용중인 아이디입니다." + username);
+    }
+
+    // 닉네임 중복 확인
+    @Transactional(readOnly = true)
+    public void checkNickname(String nickname){
+        if(userRepository.existsByNickname(nickname))
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "사용중인 닉네임입니다." + nickname);
     }
 }
