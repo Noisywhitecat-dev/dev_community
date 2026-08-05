@@ -1,0 +1,40 @@
+package com.likelion.dev_community.domain.question.dto;
+
+import com.likelion.dev_community.domain.question.entity.Question;
+import com.likelion.dev_community.domain.question.entity.QuestionStatus;
+import lombok.Getter;
+import lombok.AllArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Getter
+@AllArgsConstructor
+public class QuestionSummaryResponse {
+
+    private final Long id;
+    private final String title;
+    private final String authorNickname;
+    private final QuestionStatus status;
+
+    private final int viewCount;
+    private final int likeCount;
+    private final int answerCount;
+
+    private final List<String> tags;
+    private final LocalDateTime createdAt;
+
+    public static QuestionSummaryResponse of(Question question, int answerCount, List<String> tags) {
+        return new QuestionSummaryResponse(
+                question.getId(),
+                question.getTitle(),
+                question.getAuthor().getNickname(),
+                question.getStatus(),
+                question.getViewCount(),
+                question.getLikeCount(),
+                answerCount,
+                tags,
+                question.getCreatedAt()
+        );
+    }
+}
