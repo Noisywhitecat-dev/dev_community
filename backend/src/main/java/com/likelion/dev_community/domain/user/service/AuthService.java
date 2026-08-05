@@ -5,6 +5,7 @@ import com.likelion.dev_community.common.exception.ErrorCode;
 import com.likelion.dev_community.domain.user.dto.authDto.*;
 import com.likelion.dev_community.domain.user.entity.RefreshToken;
 import com.likelion.dev_community.domain.user.entity.User;
+import com.likelion.dev_community.domain.user.entity.UserStatus;
 import com.likelion.dev_community.domain.user.repository.RefreshTokenRepository;
 import com.likelion.dev_community.domain.user.repository.UserRepository;
 import com.likelion.dev_community.security.jwt.CookieProvider;
@@ -14,7 +15,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,10 +33,6 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final CookieProvider cookieProvider;
-
-
-    @Value("${cookie.secure}")
-    private boolean cookieSecure;
 
     // 회원가입
     @Transactional
@@ -67,6 +63,9 @@ public class AuthService {
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword()))
             throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
 
+        if(user.getStatus() == UserStatus.WITHDRAWN)
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
+
         refreshTokenRepository.deleteByUserId(user.getId());
 
         String accessToken = jwtProvider.createAccessToken(user.getId(), user.getUsername(), user.getNickname(), List.of(user.getRole().name()));
@@ -81,6 +80,7 @@ public class AuthService {
         return TokenResponse.of(accessToken);
     }
 
+    // 토큰 재발급
     @Transactional
     public ReissueResponse reissue(String refreshToken){
 
@@ -112,6 +112,7 @@ public class AuthService {
         return ReissueResponse.of(newAccessToken);
     }
 
+    // 로그아웃
     @Transactional
     public void logout(Long userId, HttpServletResponse httpServletResponse){
 
@@ -120,5 +121,19 @@ public class AuthService {
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         refreshTokenRepository.deleteByUserId(userId);
+    }
+
+    // 아이디 중복 확인
+    @Transactional(readOnly = true)
+    public void checkUsername(String username){
+        if(userRepository.existsByUsername(username))
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "사용중인 아이디입니다." + username);
+    }
+
+    // 닉네임 중복 확인
+    @Transactional(readOnly = true)
+    public void checkNickname(String nickname){
+        if(userRepository.existsByNickname(nickname))
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "사용중인 닉네임입니다." + nickname);
     }
 }

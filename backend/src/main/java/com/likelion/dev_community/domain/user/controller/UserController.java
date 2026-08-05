@@ -4,11 +4,13 @@ import com.likelion.dev_community.common.ApiResponse;
 import com.likelion.dev_community.domain.user.dto.userDto.UserInfoRequest;
 import com.likelion.dev_community.domain.user.dto.userDto.UserInfoResponse;
 import com.likelion.dev_community.domain.user.dto.userDto.UserPwRequest;
+import com.likelion.dev_community.domain.user.dto.userDto.UserWithdrawRequest;
 import com.likelion.dev_community.domain.user.service.UserService;
 import com.likelion.dev_community.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -42,5 +44,14 @@ public class UserController {
         userService.updateUserPassword(userPwRequest, customUserDetails.getId(),httpServletResponse);
 
         return ResponseEntity.ok(ApiResponse.success("비밀번호 변경 성공",null));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> softDelete(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                        @Valid @RequestBody UserWithdrawRequest request,
+                                                        HttpServletResponse httpServletResponse){
+        userService.deleteUser(customUserDetails.getId(), request.getCurrentPassword(), httpServletResponse);
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -143,3 +143,56 @@ Content-Type: application/json
   "username": "testuser01",
   "password": "newpassword123"
 }
+
+> {%
+    client.global.set("accessToken", response.body.data.accessToken);
+%}
+
+###==============================================================
+
+### 회원 탈퇴 (실패) - 현재 비밀번호 틀림 (401)
+DELETE http://localhost:8080/api/members/me
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "currentPassword": "wrongpassword"
+}
+
+### 회원 탈퇴 (실패) - 현재 비밀번호 공백 (400)
+DELETE http://localhost:8080/api/members/me
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "currentPassword": ""
+}
+
+### 회원 탈퇴 (실패) - 토큰 없이 요청 (401)
+DELETE http://localhost:8080/api/members/me
+Content-Type: application/json
+
+{
+  "currentPassword": "newpassword123"
+}
+
+### 회원 탈퇴 (성공) - 204 No Content
+DELETE http://localhost:8080/api/members/me
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "currentPassword": "newpassword123"
+}
+
+### 탈퇴 후 리프레시 토큰 무효화 확인 (실패) - 쿠키가 clear되어 재발급 실패
+POST http://localhost:8080/api/auth/reissue
+
+### 탈퇴 후 재로그인 시도 (실패) - 탈퇴한 계정 (401)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser01",
+  "password": "newpassword123"
+}
