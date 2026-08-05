@@ -3,8 +3,10 @@ package com.likelion.dev_community.domain.user.controller;
 import com.likelion.dev_community.common.ApiResponse;
 import com.likelion.dev_community.domain.user.dto.userDto.UserInfoRequest;
 import com.likelion.dev_community.domain.user.dto.userDto.UserInfoResponse;
+import com.likelion.dev_community.domain.user.dto.userDto.UserPwRequest;
 import com.likelion.dev_community.domain.user.service.UserService;
 import com.likelion.dev_community.security.CustomUserDetails;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,5 +33,14 @@ public class UserController {
         UserInfoResponse userInfo = userService.updateUserInfo(userInfoRequest, customUserDetails.getId());
 
         return ResponseEntity.ok(ApiResponse.success("회원 정보 수정 성공",userInfo));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<ApiResponse<Void>> updateUserPassword(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                @Valid @RequestBody UserPwRequest userPwRequest,
+                                                                HttpServletResponse httpServletResponse){
+        userService.updateUserPassword(userPwRequest, customUserDetails.getId(),httpServletResponse);
+
+        return ResponseEntity.ok(ApiResponse.success("비밀번호 변경 성공",null));
     }
 }
