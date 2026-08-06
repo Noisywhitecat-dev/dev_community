@@ -6,6 +6,7 @@ import com.likelion.dev_community.domain.answer.entity.Answer;
 import com.likelion.dev_community.domain.answer.repository.AnswerRepository;
 import com.likelion.dev_community.domain.question.entity.Question;
 import com.likelion.dev_community.domain.question.repository.QuestionRepository;
+import com.likelion.dev_community.domain.report.dto.ReportProcessRequest;
 import com.likelion.dev_community.domain.report.dto.ReportRequest;
 import com.likelion.dev_community.domain.report.dto.ReportResponse;
 import com.likelion.dev_community.domain.report.entity.Report;
@@ -74,6 +75,7 @@ public class ReportService {
 
 
     // 신고 목록 조회
+    @Transactional(readOnly = true)
     public Page<ReportResponse> getReports(ReportStatus status, Pageable pageable){
 
         Page<Report> reports;
@@ -96,5 +98,29 @@ public class ReportService {
                 .collect(Collectors.toMap(User::getId, User::getNickname));
 
         return reports.map(report -> ReportResponse.from(report, userIdAndNicknameMap.get(report.getTargetUserId())));
+    }
+
+    // 신고 처리
+    @Transactional
+    public ReportResponse processReport(Long reportId, ReportProcessRequest request){
+        Report report = reportRepository.findById(reportId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "존재하지 않는 신고입니다."));
+
+        ReportStatus newStatus = request.getStatus();
+
+        if(newStatus != ReportStatus.RESOLVED && newStatus != ReportStatus.REJECTED){
+            throw new CustomException(ErrorCode.INVALID_INPUT, "처리 상태는 RESOLVED 또는 REJECTED만 가능합니다.");
+        }
+        if(report.getStatus() != ReportStatus.PENDING){
+            throw new CustomException(ErrorCode.ALREADY_PROCESSED_REPORT);
+        }
+
+        switch(newStatus){
+            case REJECTED -> report.reject();
+            case RESOLVED -> report.resolve();
+        }
+
+        User user = userRepository.findById(report.getTargetUserId()).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를 찾을 수 없습니다. " + report.getTargetUserId()));
+
+        return ReportResponse.from(report, user.getNickname());
     }
 }

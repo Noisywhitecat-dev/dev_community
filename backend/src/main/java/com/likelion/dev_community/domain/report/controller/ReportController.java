@@ -1,6 +1,7 @@
 package com.likelion.dev_community.domain.report.controller;
 
 import com.likelion.dev_community.common.ApiResponse;
+import com.likelion.dev_community.domain.report.dto.ReportProcessRequest;
 import com.likelion.dev_community.domain.report.dto.ReportRequest;
 import com.likelion.dev_community.domain.report.dto.ReportResponse;
 import com.likelion.dev_community.domain.report.entity.ReportStatus;
@@ -51,8 +52,14 @@ public class ReportController {
         return ResponseEntity.ok(ApiResponse.success("신고 목록 조회 성공", reports.getContent(), meta));
     }
 
-    /*// 신고 개별 처리
-    @PatchMapping("/admin/reports")*/
+    // 신고 개별 처리
+    @PatchMapping("/admin/reports/{id}")
+    public ResponseEntity<ApiResponse<ReportResponse>> processingReport(@PathVariable(name = "id") Long reportId,
+                                                                        @Valid @RequestBody ReportProcessRequest request){
+        ReportResponse reportResponse = reportService.processReport(reportId, request);
+
+        return ResponseEntity.ok(ApiResponse.success(reportId + "신고 처리 성공",reportResponse));
+    }
 
     /*// 회원 목록 전체 조회
     @GetMapping("/admin/users")
