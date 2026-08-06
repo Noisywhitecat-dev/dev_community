@@ -7,6 +7,7 @@ import com.likelion.dev_community.domain.report.service.ReportService;
 import com.likelion.dev_community.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class ReportController {
                                                                     @Valid @RequestBody ReportRequest reportRequest){
         ReportResponse reportResponse = reportService.report(customUserDetails.getId(), reportRequest);
 
-        return ResponseEntity.ok(ApiResponse.success("신고 처리 완료", reportResponse));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("신고 접수 완료",reportResponse));
     }
 
    /* // 신고 목록 조회
