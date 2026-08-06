@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/questions/{questionId}/answers")
@@ -30,5 +32,15 @@ public class AnswerController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("답변 등록 완료", response));
+    }
+
+    // F-13
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<AnswerResponse>>> readAnswers(
+            @PathVariable Long questionId
+    ) {
+        List<AnswerResponse> response = answerService.readAnswers(questionId);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
