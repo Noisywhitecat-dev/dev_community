@@ -1,0 +1,13 @@
+package com.likelion.dev_community.domain.report.service;
+
+import com.likelion.dev_community.domain.report.repository.ReportRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class ReportService {
+
+    private final ReportRepository reportRepository;
+
+}
