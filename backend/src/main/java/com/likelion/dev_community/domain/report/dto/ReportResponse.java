@@ -1,6 +1,7 @@
 package com.likelion.dev_community.domain.report.dto;
 
 import com.likelion.dev_community.domain.report.entity.Report;
+import com.likelion.dev_community.domain.report.entity.ReportStatus;
 import com.likelion.dev_community.domain.report.entity.ReportTargetType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,6 +28,8 @@ public class ReportResponse {
 
     private final String reason;
 
+    private final ReportStatus status;
+
     private final LocalDateTime createdAt;
 
     public static ReportResponse from(Report report, String targetUserNickname){
@@ -39,6 +42,7 @@ public class ReportResponse {
                 report.getTargetUserId(),
                 targetUserNickname,
                 report.getReason(),
+                report.getStatus(),
                 report.getCreatedAt()
         );
     }
