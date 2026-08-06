@@ -5,6 +5,8 @@ import com.likelion.dev_community.domain.report.dto.ReportProcessRequest;
 import com.likelion.dev_community.domain.report.dto.ReportResponse;
 import com.likelion.dev_community.domain.report.entity.ReportStatus;
 import com.likelion.dev_community.domain.report.service.ReportService;
+import com.likelion.dev_community.domain.user.dto.userDto.UserInfoResponse;
+import com.likelion.dev_community.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +24,7 @@ import java.util.Map;
 public class AdminController {
 
     private final ReportService reportService;
+    private final UserService userService;
 
     // 신고 목록 조회
     @GetMapping("/reports")
@@ -48,12 +51,25 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(reportId + "신고 처리 성공",reportResponse));
     }
 
-    /*// 회원 목록 전체 조회
+    // 회원 목록 전체 조회
     @GetMapping("/users")
+    public ResponseEntity<ApiResponse<List<UserInfoResponse>>> getAllUsers(@PageableDefault(size = 10) Pageable pageable){
 
-    // 특정 유저의 누적된 신고 목록 카운트
-    @GetMapping("/users/{id}/reports")
+        Page<UserInfoResponse> allUsersInfo = userService.getAllUsersInfo(pageable);
 
-    // 관리자가 특정 유저 정지 수행
+        Map<String, Object> meta = Map.of(
+                "totalElements", allUsersInfo.getTotalElements(),
+                "totalPages", allUsersInfo.getTotalPages(),
+                "page", allUsersInfo.getNumber(),
+                "size", allUsersInfo.getSize()
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("전체 회원 목록 조회 성공", allUsersInfo.getContent(), meta));
+    }
+
+    /*// 특정 유저의 누적된 신고 목록 카운트
+    @GetMapping("/users/{id}/reports")*/
+
+    /*// 관리자가 특정 유저 정지 수행
     @PatchMapping("/users/{id}/suspend")*/
 }

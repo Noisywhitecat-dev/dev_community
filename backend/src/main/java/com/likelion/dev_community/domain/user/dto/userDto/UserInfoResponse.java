@@ -2,6 +2,7 @@ package com.likelion.dev_community.domain.user.dto.userDto;
 
 import com.likelion.dev_community.domain.user.entity.Role;
 import com.likelion.dev_community.domain.user.entity.User;
+import com.likelion.dev_community.domain.user.entity.UserStatus;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,7 @@ public class UserInfoResponse {
     private final String username;
     private final String nickname;
     private final Role role;
+    private final UserStatus status;
     private final LocalDateTime createdAt;
 
     public static UserInfoResponse from(User user){
@@ -23,6 +25,7 @@ public class UserInfoResponse {
                 user.getUsername(),
                 user.getNickname(),
                 user.getRole(),
+                user.getStatus(),
                 user.getCreatedAt()
         );
     }

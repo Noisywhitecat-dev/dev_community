@@ -11,11 +11,15 @@ import com.likelion.dev_community.domain.user.repository.UserRepository;
 import com.likelion.dev_community.security.jwt.CookieProvider;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -79,6 +83,14 @@ public class UserService {
 
         ResponseCookie cookie = cookieProvider.clearCookie("refreshToken");
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    // 모든 유저 조회 (관리자)
+    @Transactional(readOnly = true)
+    public Page<UserInfoResponse> getAllUsersInfo(Pageable pageable){
+        Page<User> allUsers = userRepository.findAll(pageable);
+
+        return allUsers.map(UserInfoResponse::from);
     }
 
     public User findUserById(Long userId){
