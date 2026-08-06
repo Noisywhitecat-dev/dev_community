@@ -65,4 +65,15 @@ public class AnswerController {
 
         return ResponseEntity.ok(ApiResponse.success("답변 삭제 완료", null));
     }
+
+    // F-14 채택
+    @PostMapping("/api/answers/{answerId}/adopt")
+    public ResponseEntity<ApiResponse<AnswerResponse>> adoptAnswer(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long answerId
+    ) {
+        AnswerResponse response = answerService.adoptAnswer(userDetails.getId(), answerId);
+
+        return ResponseEntity.ok(ApiResponse.success("답변 채택 완료", response));
+    }
 }

@@ -18,4 +18,7 @@ public interface AnswerService {
 
     // F-14
     void deleteAnswer(Long userId, Long answerId);
+
+    // F-14 채택
+    AnswerResponse adoptAnswer(Long userId, Long answerId);
 }

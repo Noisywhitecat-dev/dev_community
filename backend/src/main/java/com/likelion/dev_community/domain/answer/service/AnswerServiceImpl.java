@@ -8,6 +8,7 @@ import com.likelion.dev_community.domain.answer.dto.AnswerResponse;
 import com.likelion.dev_community.domain.answer.entity.Answer;
 import com.likelion.dev_community.domain.answer.repository.AnswerRepository;
 import com.likelion.dev_community.domain.question.entity.Question;
+import com.likelion.dev_community.domain.question.entity.QuestionStatus;
 import com.likelion.dev_community.domain.question.repository.QuestionRepository;
 import com.likelion.dev_community.domain.user.entity.User;
 import com.likelion.dev_community.domain.user.repository.UserRepository;
@@ -93,5 +94,28 @@ public class AnswerServiceImpl implements AnswerService {
         }
 
         answer.softDelete();
+    }
+
+    // F-14 채택
+    @Override
+    public AnswerResponse adoptAnswer(Long userId, Long answerId) {
+
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "답변을 찾을 수 없습니다."));
+
+        Question question = answer.getQuestion();
+
+        if (!question.getAuthor().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "질문 작성자만 답변을 채택할 수 있습니다.");
+        }
+
+        if (question.getStatus() == QuestionStatus.RESOLVED) {
+            throw new CustomException(ErrorCode.QUESTION_ALREADY_RESOLVED);
+        }
+
+        answer.adopt();
+        question.resolve();
+
+        return AnswerResponse.from(answer);
     }
 }
