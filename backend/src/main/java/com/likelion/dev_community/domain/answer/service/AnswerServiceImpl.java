@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -46,5 +48,19 @@ public class AnswerServiceImpl implements AnswerService {
         answerRepository.save(answer);
 
         return AnswerResponse.from(answer);
+    }
+
+    // F-13
+    @Override
+    @Transactional(readOnly = true)
+    public List<AnswerResponse> readAnswers(Long questionId) {
+
+        if (!questionRepository.existsById(questionId)) {
+            throw new CustomException(ErrorCode.NOT_FOUND, "질문을 찾을 수 없습니다.");
+        }
+
+        return answerRepository.findByQuestionIdOrderByCreatedAtAsc(questionId).stream()
+                .map(AnswerResponse::from)
+                .toList();
     }
 }
