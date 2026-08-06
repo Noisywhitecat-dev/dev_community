@@ -21,4 +21,7 @@ public interface AnswerService {
 
     // F-14 채택
     AnswerResponse adoptAnswer(Long userId, Long answerId);
+
+    // F-14-1 채택 취소
+    AnswerResponse cancelAdoption(Long userId, Long answerId);
 }
