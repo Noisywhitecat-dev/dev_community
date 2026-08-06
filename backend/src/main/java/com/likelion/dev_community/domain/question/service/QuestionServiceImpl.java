@@ -2,7 +2,9 @@ package com.likelion.dev_community.domain.question.service;
 
 import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
+import com.likelion.dev_community.common.viewcount.ViewCountService;
 import com.likelion.dev_community.common.xss.XssSanitizer;
+import com.likelion.dev_community.domain.question.dto.QuestionDetailResponse;
 import com.likelion.dev_community.domain.question.dto.QuestionSummaryResponse;
 import com.likelion.dev_community.domain.question.dto.QuestionRequest;
 import com.likelion.dev_community.domain.question.dto.QuestionResponse;
@@ -33,6 +35,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuestionTagRepository questionTagRepository;
     private final UserRepository userRepository;
     private final XssSanitizer xssSanitizer;
+    private final ViewCountService viewCountService;
 
     // F-06
     @Override
@@ -72,9 +75,9 @@ public class QuestionServiceImpl implements QuestionService {
         QuestionSortType sortType = QuestionSortType.from(sort);
 
         Page<Question> questions = switch (sortType) {
-            case LIKE -> questionRepository.findAllByOrderByLikeCount(pageable);
+            case LIKE -> questionRepository.findAllByOrderByLikeCountDesc(pageable);
             case UNRESOLVED -> questionRepository.findAllOrderByUnresolvedFirst(pageable);
-            case LATEST -> questionRepository.findAllOrderByLatest(pageable);
+            case LATEST -> questionRepository.findAllByOrderByCreatedAtDesc(pageable);
         };
 
         if (questions.isEmpty()) {
@@ -96,5 +99,23 @@ public class QuestionServiceImpl implements QuestionService {
                 0, // 답변 작성 구현 후에 수정
                 tagMap.getOrDefault(question.getId(), Collections.emptyList())
         ));
+    }
+
+    // F-08
+    @Override
+    public QuestionDetailResponse readQuestionDetail(Long questionId, String viewerKey) {
+
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "찾을 수 없는 질문"));
+
+        if (viewCountService.shouldIncrease(questionId, viewerKey)) {
+            question.increaseViewCount();
+        }
+
+        List<String> tags = questionTagRepository.findByQuestionIdIn(List.of(questionId)).stream()
+                .map(qt -> qt.getTag().getName())
+                .toList();
+
+        return QuestionDetailResponse.of(question, tags);
     }
 }

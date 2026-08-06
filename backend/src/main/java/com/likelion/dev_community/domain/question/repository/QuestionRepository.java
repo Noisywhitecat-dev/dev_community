@@ -11,11 +11,11 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     // 최신순
     @EntityGraph(attributePaths = "author")
-    Page<Question> findAllOrderByLatest(Pageable pageable);
+    Page<Question> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     // 추천순
     @EntityGraph(attributePaths = "author")
-    Page<Question> findAllByOrderByLikeCount(Pageable pageable);
+    Page<Question> findAllByOrderByLikeCountDesc(Pageable pageable);
 
     // 미해결순
     @Query(value = "select q from Question q join fetch q.author " +

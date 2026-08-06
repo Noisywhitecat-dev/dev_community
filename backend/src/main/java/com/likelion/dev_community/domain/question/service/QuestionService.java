@@ -1,5 +1,6 @@
 package com.likelion.dev_community.domain.question.service;
 
+import com.likelion.dev_community.domain.question.dto.QuestionDetailResponse;
 import com.likelion.dev_community.domain.question.dto.QuestionSummaryResponse;
 import com.likelion.dev_community.domain.question.dto.QuestionRequest;
 import com.likelion.dev_community.domain.question.dto.QuestionResponse;
@@ -12,4 +13,7 @@ public interface QuestionService {
 
     // F-07
     Page<QuestionSummaryResponse> readQuestions(int page, int size, String sort);
+
+    // F-08
+    QuestionDetailResponse readQuestionDetail(Long questionId, String viewerKey);
 }
