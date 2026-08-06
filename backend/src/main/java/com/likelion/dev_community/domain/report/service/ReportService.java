@@ -123,4 +123,11 @@ public class ReportService {
 
         return ReportResponse.from(report, user.getNickname());
     }
+
+    // 유저 신고 누적 카운트
+    @Transactional(readOnly = true)
+    public Long countByTargetUserId(Long targetUserId){
+
+        return reportRepository.countByTargetUserId(targetUserId);
+    }
 }
