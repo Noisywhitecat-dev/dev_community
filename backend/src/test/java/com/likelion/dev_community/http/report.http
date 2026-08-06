@@ -1,0 +1,116 @@
+### 로그인 (질문 작성자: testuser01)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser03",
+  "password": "password123"
+}
+
+> {%
+    client.global.set("authorToken", response.body.data.accessToken);
+%}
+
+### 신고 대상이 될 질문 작성 (testuser03)
+POST http://localhost:8080/api/questions
+Content-Type: application/json
+Authorization: Bearer {{authorToken}}
+
+{
+  "title": "신고 테스트용 질문",
+  "content": "신고 기능 확인을 위한 질문입니다.",
+  "tags": ["test"]
+}
+
+> {%
+    client.global.set("questionId", response.body.data.id);
+%}
+
+### 신고 접수 (실패) - 본인 게시물 신고 시도 (403)
+POST http://localhost:8080/api/reports
+Content-Type: application/json
+Authorization: Bearer {{authorToken}}
+
+{
+  "targetType": "QUESTION",
+  "targetId": {{questionId}},
+  "reason": "내 글 신고 테스트"
+}
+
+### 신고자 계정 가입 (testuser50)
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "username": "testuser50",
+  "password": "password123",
+  "nickname": "신고자"
+}
+
+### 로그인 (신고자: testuser50)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser50",
+  "password": "password123"
+}
+
+> {%
+    client.global.set("reporterToken", response.body.data.accessToken);
+%}
+
+### 신고 접수 (성공) - 타인 게시물 신고 (201)
+POST http://localhost:8080/api/reports
+Content-Type: application/json
+Authorization: Bearer {{reporterToken}}
+
+{
+  "targetType": "QUESTION",
+  "targetId": {{questionId}},
+  "reason": "광고성 도배글입니다"
+}
+
+### 신고 접수 (실패) - 토큰 없이 요청 (401)
+POST http://localhost:8080/api/reports
+Content-Type: application/json
+
+{
+  "targetType": "QUESTION",
+  "targetId": {{questionId}},
+  "reason": "토큰 없이 신고 시도"
+}
+
+### 신고 접수 (실패) - 존재하지 않는 질문 신고 (404)
+POST http://localhost:8080/api/reports
+Content-Type: application/json
+Authorization: Bearer {{reporterToken}}
+
+{
+  "targetType": "QUESTION",
+  "targetId": 999999,
+  "reason": "존재하지 않는 질문 신고 시도"
+}
+
+### 신고 접수 (실패) - reason 공백 (400)
+POST http://localhost:8080/api/reports
+Content-Type: application/json
+Authorization: Bearer {{reporterToken}}
+
+{
+  "targetType": "QUESTION",
+  "targetId": {{questionId}},
+  "reason": ""
+}
+
+### 신고 접수 (실패) - targetType 누락 (400)
+POST http://localhost:8080/api/reports
+Content-Type: application/json
+Authorization: Bearer {{reporterToken}}
+
+{
+  "targetId": {{questionId}},
+  "reason": "targetType 누락 테스트"
+}
+
+### Answer 대상 신고는 추후 추가 예정
