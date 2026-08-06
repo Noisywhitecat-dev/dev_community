@@ -89,4 +89,16 @@ public class Question extends BaseTimeEntity {
     public void decreaseLikeCount() {
         this.likeCount = Math.max(0, this.likeCount - 1);
     }
+
+    public void createTag(Tag tag) {
+        QuestionTag questionTag = QuestionTag.builder()
+                .question(this)
+                .tag(tag)
+                .build();
+        this.questionTags.add(questionTag);
+    }
+
+    public void deleteTags() {
+        this.questionTags.clear();
+    }
 }
