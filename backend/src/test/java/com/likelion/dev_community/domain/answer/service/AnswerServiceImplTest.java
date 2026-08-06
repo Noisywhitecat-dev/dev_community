@@ -116,6 +116,96 @@ class AnswerServiceImplTest {
                 .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND));
     }
 
+    @Test
+    void 정상적으로_답변을_수정한다() {
+        User author = createUser(1L, "answerer");
+        Question question = createQuestion(10L, createUser(2L, "asker"));
+        Answer answer = createAnswer(100L, question, author, "원래 내용");
+        AnswerRequest request = new AnswerRequest("수정된 내용");
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        AnswerResponse response = answerService.updateAnswer(1L, 100L, request);
+
+        assertThat(response.getContent()).isEqualTo("수정된 내용");
+    }
+
+    @Test
+    void 본인이_아니면_답변_수정시_예외가_발생한다() {
+        User author = createUser(1L, "answerer");
+        Question question = createQuestion(10L, createUser(2L, "asker"));
+        Answer answer = createAnswer(100L, question, author, "원래 내용");
+        AnswerRequest request = new AnswerRequest("수정된 내용");
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        assertThatThrownBy(() -> answerService.updateAnswer(999L, 100L, request))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN));
+    }
+
+    @Test
+    void 존재하지_않는_답변_수정시_예외가_발생한다() {
+        AnswerRequest request = new AnswerRequest("수정된 내용");
+
+        when(answerRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> answerService.updateAnswer(1L, 999L, request))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND));
+    }
+
+    @Test
+    void 정상적으로_답변을_삭제한다() {
+        User author = createUser(1L, "answerer");
+        Question question = createQuestion(10L, createUser(2L, "asker"));
+        Answer answer = createAnswer(100L, question, author, "내용");
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        answerService.deleteAnswer(1L, 100L);
+
+        assertThat(answer.getDeletedAt()).isNotNull();
+    }
+
+    @Test
+    void 본인이_아니면_답변_삭제시_예외가_발생한다() {
+        User author = createUser(1L, "answerer");
+        Question question = createQuestion(10L, createUser(2L, "asker"));
+        Answer answer = createAnswer(100L, question, author, "내용");
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        assertThatThrownBy(() -> answerService.deleteAnswer(999L, 100L))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN));
+        assertThat(answer.getDeletedAt()).isNull();
+    }
+
+    @Test
+    void 존재하지_않는_답변_삭제시_예외가_발생한다() {
+        when(answerRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> answerService.deleteAnswer(1L, 999L))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND));
+    }
+
+    @Test
+    void 채택된_답변은_삭제할_수_없다() {
+        User author = createUser(1L, "answerer");
+        Question question = createQuestion(10L, createUser(2L, "asker"));
+        Answer answer = createAnswer(100L, question, author, "내용");
+        answer.adopt();
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        assertThatThrownBy(() -> answerService.deleteAnswer(1L, 100L))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN));
+        assertThat(answer.getDeletedAt()).isNull();
+    }
+
     private User createUser(Long id, String nickname) {
         User user = User.builder()
                 .username(nickname)
