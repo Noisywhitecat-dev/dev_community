@@ -1,0 +1,59 @@
+package com.likelion.dev_community.domain.admin.controller;
+
+import com.likelion.dev_community.common.ApiResponse;
+import com.likelion.dev_community.domain.report.dto.ReportProcessRequest;
+import com.likelion.dev_community.domain.report.dto.ReportResponse;
+import com.likelion.dev_community.domain.report.entity.ReportStatus;
+import com.likelion.dev_community.domain.report.service.ReportService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/admin")
+public class AdminController {
+
+    private final ReportService reportService;
+
+    // 신고 목록 조회
+    @GetMapping("/reports")
+    public ResponseEntity<ApiResponse<List<ReportResponse>>> getReports(@RequestParam(required = false) ReportStatus status,
+                                                                        @PageableDefault(size = 10) Pageable pageable){
+        Page<ReportResponse> reports = reportService.getReports(status, pageable);
+
+        Map<String, Object> meta = Map.of(
+                "totalElements", reports.getTotalElements(),
+                "totalPages", reports.getTotalPages(),
+                "page", reports.getNumber(),
+                "size", reports.getSize()
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("신고 목록 조회 성공", reports.getContent(), meta));
+    }
+
+    // 신고 개별 처리
+    @PatchMapping("/reports/{id}")
+    public ResponseEntity<ApiResponse<ReportResponse>> processingReport(@PathVariable(name = "id") Long reportId,
+                                                                        @Valid @RequestBody ReportProcessRequest request){
+        ReportResponse reportResponse = reportService.processReport(reportId, request);
+
+        return ResponseEntity.ok(ApiResponse.success(reportId + "신고 처리 성공",reportResponse));
+    }
+
+    /*// 회원 목록 전체 조회
+    @GetMapping("/users")
+
+    // 특정 유저의 누적된 신고 목록 카운트
+    @GetMapping("/users/{id}/reports")
+
+    // 관리자가 특정 유저 정지 수행
+    @PatchMapping("/users/{id}/suspend")*/
+}
