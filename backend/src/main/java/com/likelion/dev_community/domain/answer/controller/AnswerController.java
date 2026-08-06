@@ -16,13 +16,12 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/questions/{questionId}/answers")
 public class AnswerController {
 
     private final AnswerService answerService;
 
     // F-12
-    @PostMapping
+    @PostMapping("/api/questions/{questionId}/answers")
     public ResponseEntity<ApiResponse<AnswerResponse>> createAnswer(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long questionId,
@@ -35,12 +34,35 @@ public class AnswerController {
     }
 
     // F-13
-    @GetMapping
+    @GetMapping("/api/questions/{questionId}/answers")
     public ResponseEntity<ApiResponse<List<AnswerResponse>>> readAnswers(
             @PathVariable Long questionId
     ) {
         List<AnswerResponse> response = answerService.readAnswers(questionId);
 
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // F-14
+    @PatchMapping("/api/answers/{answerId}")
+    public ResponseEntity<ApiResponse<AnswerResponse>> updateAnswer(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long answerId,
+            @Valid @RequestBody AnswerRequest request
+    ) {
+        AnswerResponse response = answerService.updateAnswer(userDetails.getId(), answerId, request);
+
+        return ResponseEntity.ok(ApiResponse.success("답변 수정 완료", response));
+    }
+
+    // F-14
+    @DeleteMapping("/api/answers/{answerId}")
+    public ResponseEntity<ApiResponse<Void>> deleteAnswer(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long answerId
+    ) {
+        answerService.deleteAnswer(userDetails.getId(), answerId);
+
+        return ResponseEntity.ok(ApiResponse.success("답변 삭제 완료", null));
     }
 }
