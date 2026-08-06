@@ -128,6 +128,6 @@ public class ReportService {
     @Transactional(readOnly = true)
     public Long countByTargetUserId(Long targetUserId){
 
-        return reportRepository.countByTargetUserId(targetUserId);
+        return reportRepository.countByTargetUserIdAndStatus(targetUserId, ReportStatus.RESOLVED);
     }
 }
