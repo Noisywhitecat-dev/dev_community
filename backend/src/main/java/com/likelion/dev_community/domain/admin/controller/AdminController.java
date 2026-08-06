@@ -67,8 +67,14 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success("전체 회원 목록 조회 성공", allUsersInfo.getContent(), meta));
     }
 
-    /*// 특정 유저의 누적된 신고 목록 카운트
-    @GetMapping("/users/{id}/reports")*/
+    // 특정 유저의 누적된 신고 목록 카운트
+    @GetMapping("/users/{id}/reports")
+    public ResponseEntity<ApiResponse<Long>> countReportByTargetUserId(@PathVariable(name = "id") Long userId){
+        userService.findUserById(userId);
+        Long count = reportService.countByTargetUserId(userId);
+
+        return ResponseEntity.ok(ApiResponse.success("유저 신고 누적 카운트 조회 성공",count));
+    }
 
     /*// 관리자가 특정 유저 정지 수행
     @PatchMapping("/users/{id}/suspend")*/
