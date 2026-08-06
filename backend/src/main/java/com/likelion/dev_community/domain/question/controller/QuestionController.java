@@ -2,10 +2,7 @@ package com.likelion.dev_community.domain.question.controller;
 
 import com.likelion.dev_community.common.ApiResponse;
 import com.likelion.dev_community.common.viewcount.ViewerKeyResolver;
-import com.likelion.dev_community.domain.question.dto.QuestionDetailResponse;
-import com.likelion.dev_community.domain.question.dto.QuestionSummaryResponse;
-import com.likelion.dev_community.domain.question.dto.QuestionRequest;
-import com.likelion.dev_community.domain.question.dto.QuestionResponse;
+import com.likelion.dev_community.domain.question.dto.*;
 import com.likelion.dev_community.domain.question.service.QuestionService;
 import com.likelion.dev_community.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +29,7 @@ public class QuestionController {
     @PostMapping
     public ResponseEntity<ApiResponse<QuestionResponse>> createQuestion(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody QuestionRequest request
+            @Valid @RequestBody QuestionCreateRequest request
     ) {
         QuestionResponse response = questionService.createQuestion(userDetails.getId(), request);
 
@@ -69,8 +66,41 @@ public class QuestionController {
         Long userId = (userDetails != null) ? userDetails.getId() : null;
         String viewerKey = viewerKeyResolver.resolve(userId, request);
 
-        QuestionDetailResponse response = questionService.readQuestionDetail(id, viewerKey);
+        QuestionDetailResponse response = questionService.readDetailQuestion(id, viewerKey);
 
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // F-09 (수정)
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<QuestionResponse>> updateQuestion(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody QuestionUpdateRequest request
+    ) {
+        boolean isAdmin = isAdmin(userDetails);
+
+        QuestionResponse response = questionService.updateQuestion(id, userDetails.getId(), isAdmin, request);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // F-09 (삭제)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteQuestion(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        boolean isAdmin = isAdmin(userDetails);
+
+        questionService.deleteQuestion(id, userDetails.getId(), isAdmin);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    // 토큰 권한에 ROLE_ADMIN 있는지 확인
+    private boolean isAdmin(CustomUserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
     }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class QuestionRequest {
+public class QuestionUpdateRequest {
     @NotBlank(message = "제목을 입력해주세요.")
     private final String title;
 

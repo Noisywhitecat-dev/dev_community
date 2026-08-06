@@ -4,10 +4,7 @@ import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
 import com.likelion.dev_community.common.viewcount.ViewCountService;
 import com.likelion.dev_community.common.xss.XssSanitizer;
-import com.likelion.dev_community.domain.question.dto.QuestionDetailResponse;
-import com.likelion.dev_community.domain.question.dto.QuestionSummaryResponse;
-import com.likelion.dev_community.domain.question.dto.QuestionRequest;
-import com.likelion.dev_community.domain.question.dto.QuestionResponse;
+import com.likelion.dev_community.domain.question.dto.*;
 import com.likelion.dev_community.domain.question.entity.Question;
 import com.likelion.dev_community.domain.question.entity.QuestionSortType;
 import com.likelion.dev_community.domain.question.repository.QuestionRepository;
@@ -39,10 +36,10 @@ public class QuestionServiceImpl implements QuestionService {
 
     // F-06
     @Override
-    public QuestionResponse createQuestion(Long userId, QuestionRequest request) {
+    public QuestionResponse createQuestion(Long userId, QuestionCreateRequest request) {
 
         User author = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "사용자 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "찾을 수 없는 사용자 정보"));
 
         String title = xssSanitizer.sanitize(request.getTitle());
         String content = xssSanitizer.sanitize(request.getContent());
@@ -103,7 +100,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     // F-08
     @Override
-    public QuestionDetailResponse readQuestionDetail(Long questionId, String viewerKey) {
+    public QuestionDetailResponse readDetailQuestion(Long questionId, String viewerKey) {
 
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "찾을 수 없는 질문"));
@@ -117,5 +114,46 @@ public class QuestionServiceImpl implements QuestionService {
                 .toList();
 
         return QuestionDetailResponse.of(question, tags);
+    }
+
+    // F-09 (수정)
+    @Override
+    public QuestionResponse updateQuestion(Long questionId, Long userId, boolean isAdmin, QuestionUpdateRequest request) {
+
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "찾을 수 없는 질문"));
+
+        checkUpdate(question, userId, isAdmin);
+
+        String title = xssSanitizer.sanitize(request.getTitle());
+        String content = xssSanitizer.sanitize(request.getContent());
+        question.update(title, content);
+
+        // 태그 저장 로직은 F-10에서 추가
+        return QuestionResponse.from(question, Collections.emptyList());
+    }
+
+    // F-09 (삭제)
+    @Override
+    public void deleteQuestion(Long questionId, Long userId, boolean isAdmin) {
+
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "찾을 수 없는 질문"));
+
+        checkDelete(question, userId, isAdmin);
+
+        question.softDelete();
+    }
+
+    private void checkUpdate(Question question, Long userId, boolean isAdmin) {
+        if (!question.getAuthor().getId().equals(userId) && !isAdmin) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "본인이 작성한 질문만 수정 가능");
+        }
+    }
+
+    private void checkDelete(Question question, Long userId, boolean isAdmin) {
+        if (!question.getAuthor().getId().equals(userId) && !isAdmin) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "본인이 작성한 질문만 삭제 가능");
+        }
     }
 }

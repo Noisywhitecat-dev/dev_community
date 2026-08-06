@@ -64,8 +64,10 @@ public class Question extends BaseTimeEntity {
         this.content = content;
     }
 
+    // F-09
     public void softDelete() {
         this.deletedAt = LocalDateTime.now();
+        this.status = QuestionStatus.DELETED;
     }
 
     public void resolve() {
