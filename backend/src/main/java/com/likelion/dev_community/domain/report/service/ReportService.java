@@ -9,13 +9,20 @@ import com.likelion.dev_community.domain.question.repository.QuestionRepository;
 import com.likelion.dev_community.domain.report.dto.ReportRequest;
 import com.likelion.dev_community.domain.report.dto.ReportResponse;
 import com.likelion.dev_community.domain.report.entity.Report;
+import com.likelion.dev_community.domain.report.entity.ReportStatus;
 import com.likelion.dev_community.domain.report.entity.ReportTargetType;
 import com.likelion.dev_community.domain.report.repository.ReportRepository;
 import com.likelion.dev_community.domain.user.entity.User;
 import com.likelion.dev_community.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,5 +70,31 @@ public class ReportService {
                 .build());
 
         return ReportResponse.from(report, targetUserNickname);
+    }
+
+
+    // 신고 목록 조회
+    public Page<ReportResponse> getReports(ReportStatus status, Pageable pageable){
+
+        Page<Report> reports;
+
+        if(status == null) {
+            reports = reportRepository.findAll(pageable);
+        }
+        else{
+            reports = reportRepository.findByStatus(status, pageable);
+        }
+
+        List<Long> userIds = reports.stream()
+                .map(Report::getTargetUserId)
+                .distinct()
+                .toList();
+
+        List<User> users = userRepository.findAllById(userIds);
+
+        Map<Long, String> userIdAndNicknameMap = users.stream()
+                .collect(Collectors.toMap(User::getId, User::getNickname));
+
+        return reports.map(report -> ReportResponse.from(report, userIdAndNicknameMap.get(report.getTargetUserId())));
     }
 }
