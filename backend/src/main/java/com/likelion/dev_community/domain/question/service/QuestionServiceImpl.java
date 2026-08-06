@@ -7,8 +7,10 @@ import com.likelion.dev_community.common.xss.XssSanitizer;
 import com.likelion.dev_community.domain.question.dto.*;
 import com.likelion.dev_community.domain.question.entity.Question;
 import com.likelion.dev_community.domain.question.entity.QuestionSortType;
+import com.likelion.dev_community.domain.question.entity.Tag;
 import com.likelion.dev_community.domain.question.repository.QuestionRepository;
 import com.likelion.dev_community.domain.question.repository.QuestionTagRepository;
+import com.likelion.dev_community.domain.question.repository.TagRepository;
 import com.likelion.dev_community.domain.user.entity.User;
 import com.likelion.dev_community.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +33,9 @@ public class QuestionServiceImpl implements QuestionService {
     private final UserRepository userRepository;
     private final XssSanitizer xssSanitizer;
     private final ViewCountService viewCountService;
+    private final TagRepository tagRepository;
+    private static final int MAX_TAG_COUNT = 5;
+    private static final int MAX_TAG_LENGTH = 30;
 
     // F-06
     @Override
@@ -52,7 +55,8 @@ public class QuestionServiceImpl implements QuestionService {
 
         questionRepository.save(question);
 
-        // 태그 저장 로직은 F-10에서 추가
+        List<String> tagNames = attachTags(question, request.getTags());
+
         return QuestionResponse.from(question, Collections.emptyList());
     }
 
@@ -129,7 +133,9 @@ public class QuestionServiceImpl implements QuestionService {
         String content = xssSanitizer.sanitize(request.getContent());
         question.update(title, content);
 
-        // 태그 저장 로직은 F-10에서 추가
+        question.deleteTags();
+        List<String> tagNames = attachTags(question, request.getTags());
+
         return QuestionResponse.from(question, Collections.emptyList());
     }
 
@@ -155,5 +161,45 @@ public class QuestionServiceImpl implements QuestionService {
         if (!question.getAuthor().getId().equals(userId) && !isAdmin) {
             throw new CustomException(ErrorCode.FORBIDDEN, "본인이 작성한 질문만 삭제 가능");
         }
+    }
+
+    // F-10
+    private List<String> attachTags(Question question, List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        if (tags.size() > MAX_TAG_COUNT) {
+            throw new CustomException(ErrorCode.INVALID_INPUT, "태그는 최대 5개까지 등록 가능");
+        }
+
+        Set<String> normalizedNames = tags.stream()
+                .map(this::normalizeTagName)
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        List<String> result = new ArrayList<>();
+
+        for (String name : normalizedNames) {
+            if (name.length() > MAX_TAG_LENGTH) {
+                throw new CustomException(ErrorCode.INVALID_INPUT, "태그의 최대 길이는 30자");
+            }
+
+            Tag tag = tagRepository.findByName(name)
+                    .orElseGet(() -> tagRepository.save(Tag.builder().name(name).build()));
+
+            question.createTag(tag);
+            result.add(tag.getName());
+        }
+
+        return result;
+    }
+
+    // trim + 소문자 정규화
+    private String normalizeTagName(String rawName) {
+        if (rawName == null) {
+            return "";
+        }
+        return rawName.trim().toLowerCase();
     }
 }
