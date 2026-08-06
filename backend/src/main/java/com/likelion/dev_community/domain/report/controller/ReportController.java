@@ -9,10 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +18,7 @@ public class ReportController {
 
     private final ReportService reportService;
 
+    // 신고 접수
     @PostMapping("/reports")
     public ResponseEntity<ApiResponse<ReportResponse>> createReport(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                                     @Valid @RequestBody ReportRequest reportRequest){
@@ -28,4 +26,19 @@ public class ReportController {
 
         return ResponseEntity.ok(ApiResponse.success("신고 처리 완료", reportResponse));
     }
+
+   /* // 신고 목록 조회
+    @GetMapping("/admin/reports")
+
+    // 신고 개별 처리
+    @PatchMapping("/admin/reports")
+
+    // 회원 목록 전체 조회
+    @GetMapping("/admin/users")
+
+    // 특정 유저의 누적된 신고 목록 카운트
+    @GetMapping("/admin/users/{id}/reports")
+
+    // 관리자가 특정 유저 정지 수행
+    @PatchMapping("/admin/users/{id}/suspend")*/
 }
