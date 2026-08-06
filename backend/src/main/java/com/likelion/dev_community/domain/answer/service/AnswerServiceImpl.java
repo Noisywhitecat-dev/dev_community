@@ -63,4 +63,35 @@ public class AnswerServiceImpl implements AnswerService {
                 .map(AnswerResponse::from)
                 .toList();
     }
+
+    // F-14
+    @Override
+    public AnswerResponse updateAnswer(Long userId, Long answerId, AnswerRequest request) {
+
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "답변을 찾을 수 없습니다."));
+
+        if (!answer.getAuthor().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "본인이 작성한 답변만 수정할 수 있습니다.");
+        }
+
+        String content = xssSanitizer.sanitize(request.getContent());
+        answer.update(content);
+
+        return AnswerResponse.from(answer);
+    }
+
+    // F-14
+    @Override
+    public void deleteAnswer(Long userId, Long answerId) {
+
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "답변을 찾을 수 없습니다."));
+
+        if (!answer.getAuthor().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "본인이 작성한 답변만 삭제할 수 있습니다.");
+        }
+
+        answer.softDelete();
+    }
 }
