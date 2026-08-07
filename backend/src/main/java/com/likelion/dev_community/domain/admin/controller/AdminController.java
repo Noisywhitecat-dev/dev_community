@@ -9,6 +9,7 @@ import com.likelion.dev_community.domain.user.dto.userDto.UserInfoResponse;
 import com.likelion.dev_community.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -29,7 +30,7 @@ public class AdminController {
     // 신고 목록 조회
     @GetMapping("/reports")
     public ResponseEntity<ApiResponse<List<ReportResponse>>> getReports(@RequestParam(required = false) ReportStatus status,
-                                                                        @PageableDefault(size = 10) Pageable pageable){
+                                                                        @ParameterObject @PageableDefault(size = 10) Pageable pageable){
         Page<ReportResponse> reports = reportService.getReports(status, pageable);
 
         Map<String, Object> meta = Map.of(
@@ -53,7 +54,7 @@ public class AdminController {
 
     // 회원 목록 전체 조회
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<List<UserInfoResponse>>> getAllUsers(@PageableDefault(size = 10) Pageable pageable){
+    public ResponseEntity<ApiResponse<List<UserInfoResponse>>> getAllUsers(@ParameterObject @PageableDefault(size = 10) Pageable pageable){
 
         Page<UserInfoResponse> allUsersInfo = userService.getAllUsersInfo(pageable);
 

@@ -11,6 +11,7 @@ import com.likelion.dev_community.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -64,7 +65,7 @@ public class UserController {
     // 마이페이지 - 내 질문 목록 조회
     @GetMapping("/me/questions")
     public ResponseEntity<ApiResponse<List<QuestionSummaryResponse>>> getMyQuestions(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                                                                     @PageableDefault(size = 10) Pageable pageable){
+                                                                                     @ParameterObject @PageableDefault(size = 10) Pageable pageable){
         Page<QuestionSummaryResponse> myQuestions = userService.getMyQuestions(customUserDetails.getId(), pageable);
 
         Map<String, Object> meta = Map.of(

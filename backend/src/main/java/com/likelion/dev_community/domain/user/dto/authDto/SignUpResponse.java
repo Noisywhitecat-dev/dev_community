@@ -8,13 +8,11 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class SignUpResponse {
-    private final Long userId;
     private final String username;
     private final String nickname;
 
     public static SignUpResponse from(User user){
         return new SignUpResponse(
-                user.getId(),
                 user.getUsername(),
                 user.getNickname()
         );
