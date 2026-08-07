@@ -42,9 +42,12 @@ public class QuestionController {
     public ResponseEntity<ApiResponse<List<QuestionSummaryResponse>>> readQuestions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String sort
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String keyword // F-17
+
+
     ) {
-        Page<QuestionSummaryResponse> result = questionService.readQuestions(page, size, sort);
+        Page<QuestionSummaryResponse> result = questionService.readQuestions(page, size, sort, keyword);
 
         Map<String, Object> meta = Map.of(
                 "page", result.getNumber(),

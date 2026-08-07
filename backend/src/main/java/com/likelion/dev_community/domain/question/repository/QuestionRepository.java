@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface QuestionRepository extends JpaRepository<Question, Long> {
+public interface QuestionRepository extends JpaRepository<Question, Long>, QuestionRepositoryCustom {
 
     // 최신순
     @EntityGraph(attributePaths = "author")
