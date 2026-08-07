@@ -123,6 +123,20 @@ public class UserService {
         return UserInfoResponse.from(user);
     }
 
+
+    // 유저 정지 해제
+    @Transactional
+    public UserInfoResponse userUnsuspension(Long userId){
+        User user = findUserById(userId);
+
+        if(!user.getStatus().equals(UserStatus.SUSPENDED))
+            throw new CustomException(ErrorCode.NOT_SUSPENDED_USER);
+
+        user.unsuspend();
+
+        return UserInfoResponse.from(user);
+    }
+
     public User findUserById(Long userId){
         return userRepository.findById(userId).orElseThrow(()->new CustomException(ErrorCode.NOT_FOUND, "유저를 찾을 수 없습니다. "+userId));
     }

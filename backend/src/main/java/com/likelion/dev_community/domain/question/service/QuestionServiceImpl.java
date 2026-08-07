@@ -4,6 +4,7 @@ import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
 import com.likelion.dev_community.common.viewcount.ViewCountService;
 import com.likelion.dev_community.common.xss.XssSanitizer;
+import com.likelion.dev_community.domain.answer.entity.Answer;
 import com.likelion.dev_community.domain.answer.repository.AnswerRepository;
 import com.likelion.dev_community.domain.answer.repository.QuestionAnswerCount;
 import com.likelion.dev_community.domain.question.dto.*;
@@ -171,6 +172,9 @@ public class QuestionServiceImpl implements QuestionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "찾을 수 없는 질문"));
 
         checkDelete(question, userId, isAdmin);
+
+        answerRepository.findByQuestionIdOrderByCreatedAtAsc(questionId)
+                .forEach(Answer::cascadeSoftDelete);
 
         question.softDelete();
     }

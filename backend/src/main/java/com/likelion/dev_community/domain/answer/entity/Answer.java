@@ -63,6 +63,10 @@ public class Answer extends BaseTimeEntity {
         this.deletedAt = LocalDateTime.now();
     }
 
+    public void cascadeSoftDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
     public void adopt() {
         this.isAdopted = true;
     }

@@ -85,4 +85,11 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(userId + " 회원 정지됨", userInfoResponse));
     }
 
+    // 정지 해제
+    @PatchMapping("/users/{id}/unsuspend")
+    public ResponseEntity<ApiResponse<UserInfoResponse>> userUnsuspension(@PathVariable(name = "id") Long userId){
+        UserInfoResponse userInfoResponse = userService.userUnsuspension(userId);
+
+        return ResponseEntity.ok(ApiResponse.success(userId + " 회원 정지 해제", userInfoResponse));
+    }
 }
