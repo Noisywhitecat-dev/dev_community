@@ -30,7 +30,7 @@ public class QuestionDetailResponse {
         return new QuestionDetailResponse(
                 question.getId(),
                 question.getAuthor().getId(),
-                question.getAuthor().getNickname(),
+                question.getAuthor().getDisplayNickname(),
                 question.getTitle(),
                 question.getContent(),
                 question.getStatus(),

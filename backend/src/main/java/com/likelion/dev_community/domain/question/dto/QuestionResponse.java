@@ -29,7 +29,7 @@ public class QuestionResponse {
         return new QuestionResponse(
                 question.getId(),
                 question.getAuthor().getId(),
-                question.getAuthor().getNickname(),
+                question.getAuthor().getDisplayNickname(),
                 question.getTitle(),
                 question.getContent(),
                 question.getStatus(),

@@ -72,4 +72,8 @@ public class User extends BaseTimeEntity {
     public void unsuspend(){
         this.status =UserStatus.ACTIVE;
     }
+
+    public String getDisplayNickname(){
+        return this.status == UserStatus.WITHDRAWN ? "탈퇴한 사용자" : this.nickname;
+    }
 }
