@@ -63,7 +63,7 @@ public class QuestionServiceImpl implements QuestionService {
     // F-07
     @Override
     @Transactional(readOnly = true)
-    public Page<QuestionSummaryResponse> readQuestions(int page, int size, String sort) {
+    public Page<QuestionSummaryResponse> readQuestions(int page, int size, String sort, String keyword) {
 
         if (page < 0) {
             throw new CustomException(ErrorCode.INVALID_INPUT, "page는 0 이상이어야 합니다.");
@@ -73,13 +73,20 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        QuestionSortType sortType = QuestionSortType.from(sort);
 
-        Page<Question> questions = switch (sortType) {
-            case LIKE -> questionRepository.findAllByOrderByLikeCountDesc(pageable);
-            case UNRESOLVED -> questionRepository.findAllOrderByUnresolvedFirst(pageable);
-            case LATEST -> questionRepository.findAllByOrderByCreatedAtDesc(pageable);
-        };
+        // F-17
+        Page<Question> questions;
+
+        if (keyword != null && !keyword.isBlank()) {
+            questions = questionRepository.search(keyword.trim(), pageable);
+        } else {
+            QuestionSortType sortType = QuestionSortType.from(sort);
+            questions = switch (sortType) {
+                case LIKE -> questionRepository.findAllByOrderByLikeCountDesc(pageable);
+                case UNRESOLVED -> questionRepository.findAllOrderByUnresolvedFirst(pageable);
+                case LATEST -> questionRepository.findAllByOrderByCreatedAtDesc(pageable);
+            };
+        }
 
         if (questions.isEmpty()) {
             return Page.empty(pageable);

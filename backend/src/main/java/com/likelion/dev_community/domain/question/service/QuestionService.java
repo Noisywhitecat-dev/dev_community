@@ -9,7 +9,7 @@ public interface QuestionService {
     QuestionResponse createQuestion(Long userId, QuestionCreateRequest request);
 
     // F-07
-    Page<QuestionSummaryResponse> readQuestions(int page, int size, String sort);
+    Page<QuestionSummaryResponse> readQuestions(int page, int size, String sort, String keyword);
 
     // F-08
     QuestionDetailResponse readDetailQuestion(Long questionId, String viewerKey);
