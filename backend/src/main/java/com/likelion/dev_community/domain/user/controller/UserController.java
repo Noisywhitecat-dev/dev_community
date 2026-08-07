@@ -1,6 +1,7 @@
 package com.likelion.dev_community.domain.user.controller;
 
 import com.likelion.dev_community.common.ApiResponse;
+import com.likelion.dev_community.domain.answer.dto.AnswerResponse;
 import com.likelion.dev_community.domain.question.dto.QuestionSummaryResponse;
 import com.likelion.dev_community.domain.user.dto.userDto.UserInfoRequest;
 import com.likelion.dev_community.domain.user.dto.userDto.UserInfoResponse;
@@ -76,5 +77,21 @@ public class UserController {
         );
 
         return ResponseEntity.ok(ApiResponse.success("내 질문 목록 조회 성공", myQuestions.getContent(),meta));
+    }
+
+    // 마이페이지 - 내 답변 목록 조회
+    @GetMapping("/me/answers")
+    public ResponseEntity<ApiResponse<List<AnswerResponse>>> getMyAnswers(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                           @ParameterObject @PageableDefault(size = 10) Pageable pageable){
+        Page<AnswerResponse> myAnswers = userService.getMyAnswers(customUserDetails.getId(), pageable);
+
+        Map<String, Object> meta = Map.of(
+                "page", myAnswers.getNumber(),
+                "size", myAnswers.getSize(),
+                "totalElements", myAnswers.getTotalElements(),
+                "totalPages", myAnswers.getTotalPages()
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("내 답변 목록 조회 성공", myAnswers.getContent(), meta));
     }
 }
