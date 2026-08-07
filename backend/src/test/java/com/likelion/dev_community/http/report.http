@@ -3,7 +3,7 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "testuser03",
+  "username": "testuser01",
   "password": "password123"
 }
 
@@ -296,6 +296,56 @@ Authorization: Bearer {{reporterToken}}
 
 ### 유저별 누적 신고 카운트 조회 (실패) - 토큰 없이 요청 (401)
 GET http://localhost:8080/api/admin/users/{{targetUserId}}/reports
+
+### ============================================================
+
+### 정지 대상 재로그인 (쿠키 갱신용)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser01",
+  "password": "password123"
+}
+
+> {%
+    client.global.set("suspendTargetToken", response.body.data.accessToken);
+%}
+
+### 회원 정지 (실패) - 일반 유저 권한 없음 (403)
+PATCH http://localhost:8080/api/admin/users/{{targetUserId}}/suspend
+Authorization: Bearer {{reporterToken}}
+
+### 회원 정지 (실패) - 토큰 없이 요청 (401)
+PATCH http://localhost:8080/api/admin/users/{{targetUserId}}/suspend
+
+### 회원 정지 (실패) - 존재하지 않는 유저 (404)
+PATCH http://localhost:8080/api/admin/users/999999/suspend
+Authorization: Bearer {{adminToken}}
+
+### 회원 정지 (성공) - status가 SUSPENDED로 응답에 반영되는지 확인 (200)
+PATCH http://localhost:8080/api/admin/users/{{targetUserId}}/suspend
+Authorization: Bearer {{adminToken}}
+
+### 회원 정지 (실패) - 이미 정지된 유저 재정지 시도 (409)
+PATCH http://localhost:8080/api/admin/users/{{targetUserId}}/suspend
+Authorization: Bearer {{adminToken}}
+
+### 정지 후 확인 - 액세스 토큰은 만료 전까지 그대로 유효함 (stateless라 200, 정지와 무관)
+GET http://localhost:8080/api/members/me
+Authorization: Bearer {{suspendTargetToken}}
+
+### 정지 후 확인 (실패) - 리프레시 토큰이 Redis에서 삭제되어 재발급 불가 (401)
+POST http://localhost:8080/api/auth/reissue
+
+### 정지 후 확인 (실패) - 정지된 계정으로 재로그인 시도 (401)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser01",
+  "password": "password123"
+}
 
 ### ============================================================
 

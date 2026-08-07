@@ -51,7 +51,7 @@ public class AnswerServiceImpl implements AnswerService {
         return AnswerResponse.from(answer);
     }
 
-    // F-13
+    //
     @Override
     @Transactional(readOnly = true)
     public List<AnswerResponse> readAnswers(Long questionId) {
@@ -65,7 +65,7 @@ public class AnswerServiceImpl implements AnswerService {
                 .toList();
     }
 
-    // F-14
+    // F-13
     @Override
     public AnswerResponse updateAnswer(Long userId, Long answerId, AnswerRequest request) {
 
@@ -82,7 +82,7 @@ public class AnswerServiceImpl implements AnswerService {
         return AnswerResponse.from(answer);
     }
 
-    // F-14
+    // F-13
     @Override
     public void deleteAnswer(Long userId, Long answerId) {
 

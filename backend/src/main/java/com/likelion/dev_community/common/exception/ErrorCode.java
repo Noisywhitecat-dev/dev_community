@@ -13,13 +13,17 @@ public enum ErrorCode {
     DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "DUPLICATE_RESOURCE", "이미 존재하는 리소스입니다."),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "서버 내부 오류가 발생했습니다."),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED,"INVALID_CREDENTIALS","아이디 또는 비밀번호가 올바르지 않습니다."),
+    SUSPENDED_ACCOUNT(HttpStatus.UNAUTHORIZED,"SUSPENDED_ACCOUNT","정지된 계정입니다."),
+    WITHDRAWN_ACCOUNT(HttpStatus.UNAUTHORIZED,"WITHDRAWN_ACCOUNT","탈퇴한 계정입니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,"INVALID_REFRESH_TOKEN","유효하지 않은 토큰"),
     EXPIRED_REFRESH_TOKEN(HttpStatus.FORBIDDEN,"EXPIRED_REFRESH_TOKEN","만료된 토큰"),
     QUESTION_ALREADY_RESOLVED(HttpStatus.CONFLICT, "QUESTION_ALREADY_RESOLVED", "이미 채택된 답변이 존재하는 질문입니다."),
     ANSWER_NOT_ADOPTED(HttpStatus.CONFLICT, "ANSWER_NOT_ADOPTED", "채택되지 않은 답변입니다."),
 
     SELF_REPORT_NOT_ALLOWED(HttpStatus.FORBIDDEN,"SELF_REPORT_NOT_ALLOWED", "자신의 게시물, 답변은 신고할 수 없습니다."),
-    ALREADY_PROCESSED_REPORT(HttpStatus.CONFLICT, "ALREADY_PROCESSED_REPORT", "이미 처리된 신고입니다.");
+    ALREADY_PROCESSED_REPORT(HttpStatus.CONFLICT, "ALREADY_PROCESSED_REPORT", "이미 처리된 신고입니다."),
+
+    ALREADY_SUSPENDED_USER(HttpStatus.CONFLICT, "ALREADY_SUSPENDED_USER", "이미 정지 처리된 사용자입니다.");
 
     private final HttpStatus status;
     private final String code;

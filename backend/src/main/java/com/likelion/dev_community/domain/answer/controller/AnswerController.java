@@ -33,7 +33,7 @@ public class AnswerController {
                 .body(ApiResponse.success("답변 등록 완료", response));
     }
 
-    // F-13
+    //
     @GetMapping("/api/questions/{questionId}/answers")
     public ResponseEntity<ApiResponse<List<AnswerResponse>>> readAnswers(
             @PathVariable Long questionId
@@ -43,7 +43,7 @@ public class AnswerController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // F-14
+    // F-13
     @PatchMapping("/api/answers/{answerId}")
     public ResponseEntity<ApiResponse<AnswerResponse>> updateAnswer(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -55,7 +55,7 @@ public class AnswerController {
         return ResponseEntity.ok(ApiResponse.success("답변 수정 완료", response));
     }
 
-    // F-14
+    // F-13
     @DeleteMapping("/api/answers/{answerId}")
     public ResponseEntity<ApiResponse<Void>> deleteAnswer(
             @AuthenticationPrincipal CustomUserDetails userDetails,
