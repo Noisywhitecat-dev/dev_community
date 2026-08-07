@@ -43,11 +43,12 @@ public class QuestionController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String keyword // F-17
+            @RequestParam(required = false) String keyword, // F-17
+            @RequestParam(required = false) String tag // F-18
 
 
     ) {
-        Page<QuestionSummaryResponse> result = questionService.readQuestions(page, size, sort, keyword);
+        Page<QuestionSummaryResponse> result = questionService.readQuestions(page, size, sort, keyword, tag);
 
         Map<String, Object> meta = Map.of(
                 "page", result.getNumber(),
