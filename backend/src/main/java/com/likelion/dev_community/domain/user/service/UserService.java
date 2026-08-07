@@ -130,7 +130,7 @@ public class UserService {
         User user = findUserById(userId);
 
         if(!user.getStatus().equals(UserStatus.SUSPENDED))
-            throw new CustomException(ErrorCode.ALREADY_SUSPENDED_USER);
+            throw new CustomException(ErrorCode.NOT_SUSPENDED_USER);
 
         user.unsuspend();
 
