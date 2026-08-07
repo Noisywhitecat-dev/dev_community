@@ -8,6 +8,7 @@ import com.likelion.dev_community.domain.answer.dto.AnswerResponse;
 import com.likelion.dev_community.domain.answer.entity.Answer;
 import com.likelion.dev_community.domain.answer.repository.AnswerRepository;
 import com.likelion.dev_community.domain.question.entity.Question;
+import com.likelion.dev_community.domain.question.entity.QuestionStatus;
 import com.likelion.dev_community.domain.question.repository.QuestionRepository;
 import com.likelion.dev_community.domain.user.entity.Role;
 import com.likelion.dev_community.domain.user.entity.User;
@@ -204,6 +205,77 @@ class AnswerServiceImplTest {
                 .isInstanceOf(CustomException.class)
                 .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN));
         assertThat(answer.getDeletedAt()).isNull();
+    }
+
+    @Test
+    void 정상적으로_답변을_채택한다() {
+        User asker = createUser(1L, "asker");
+        Question question = createQuestion(10L, asker);
+        Answer answer = createAnswer(100L, question, createUser(2L, "answerer"), "내용");
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        AnswerResponse response = answerService.adoptAnswer(1L, 100L);
+
+        assertThat(response.isAdopted()).isTrue();
+        assertThat(answer.isAdopted()).isTrue();
+        assertThat(question.getStatus()).isEqualTo(QuestionStatus.RESOLVED);
+    }
+
+    @Test
+    void 질문_작성자가_아니면_답변_채택시_예외가_발생한다() {
+        User asker = createUser(1L, "asker");
+        Question question = createQuestion(10L, asker);
+        Answer answer = createAnswer(100L, question, createUser(2L, "answerer"), "내용");
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        assertThatThrownBy(() -> answerService.adoptAnswer(999L, 100L))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN));
+        assertThat(answer.isAdopted()).isFalse();
+        assertThat(question.getStatus()).isEqualTo(QuestionStatus.OPEN);
+    }
+
+    @Test
+    void 이미_채택된_답변을_다시_채택하면_예외가_발생한다() {
+        User asker = createUser(1L, "asker");
+        Question question = createQuestion(10L, asker);
+        Answer answer = createAnswer(100L, question, createUser(2L, "answerer"), "내용");
+        answer.adopt();
+        question.resolve();
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        assertThatThrownBy(() -> answerService.adoptAnswer(1L, 100L))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.QUESTION_ALREADY_RESOLVED));
+    }
+
+    @Test
+    void 이미_RESOLVED인_질문의_다른_답변을_채택하면_예외가_발생한다() {
+        User asker = createUser(1L, "asker");
+        Question question = createQuestion(10L, asker);
+        Answer adoptedAnswer = createAnswer(100L, question, createUser(2L, "answerer1"), "채택된 답변");
+        Answer otherAnswer = createAnswer(101L, question, createUser(3L, "answerer2"), "다른 답변");
+        adoptedAnswer.adopt();
+        question.resolve();
+
+        when(answerRepository.findById(101L)).thenReturn(Optional.of(otherAnswer));
+
+        assertThatThrownBy(() -> answerService.adoptAnswer(1L, 101L))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.QUESTION_ALREADY_RESOLVED));
+        assertThat(otherAnswer.isAdopted()).isFalse();
+    }
+
+    @Test
+    void 존재하지_않는_답변_채택시_예외가_발생한다() {
+        when(answerRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> answerService.adoptAnswer(1L, 999L))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND));
     }
 
     private User createUser(Long id, String nickname) {
