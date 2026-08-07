@@ -17,7 +17,9 @@ public enum ErrorCode {
     EXPIRED_REFRESH_TOKEN(HttpStatus.FORBIDDEN,"EXPIRED_REFRESH_TOKEN","만료된 토큰"),
 
     SELF_REPORT_NOT_ALLOWED(HttpStatus.FORBIDDEN,"SELF_REPORT_NOT_ALLOWED", "자신의 게시물, 답변은 신고할 수 없습니다."),
-    ALREADY_PROCESSED_REPORT(HttpStatus.CONFLICT, "ALREADY_PROCESSED_REPORT", "이미 처리된 신고입니다.");
+    ALREADY_PROCESSED_REPORT(HttpStatus.CONFLICT, "ALREADY_PROCESSED_REPORT", "이미 처리된 신고입니다."),
+
+    ALREADY_SUSPENDED_USER(HttpStatus.CONFLICT, "ALREADY_SUSPENDED_USER", "이미 정지 처리된 사용자입니다.");
 
     private final HttpStatus status;
     private final String code;

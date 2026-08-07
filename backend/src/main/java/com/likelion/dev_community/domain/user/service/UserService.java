@@ -95,16 +95,18 @@ public class UserService {
     }
 
     // 유저 정지
-    @Transactional(readOnly = true)
+    @Transactional
     public UserInfoResponse userSuspension(Long userId){
         User user = findUserById(userId);
 
         if(user.getStatus().equals(UserStatus.SUSPENDED))
-            throw new CustomException()
+            throw new CustomException(ErrorCode.ALREADY_SUSPENDED_USER);
 
         user.suspend();
 
+        refreshTokenRepository.deleteByUserId(userId);
 
+        return UserInfoResponse.from(user);
     }
 
     public User findUserById(Long userId){

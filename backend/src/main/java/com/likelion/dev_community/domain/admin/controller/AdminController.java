@@ -78,5 +78,10 @@ public class AdminController {
 
     // 관리자가 특정 유저 정지 수행
     @PatchMapping("/users/{id}/suspend")
+    public ResponseEntity<ApiResponse<UserInfoResponse>> userSuspension(@PathVariable(name = "id") Long userId){
+        UserInfoResponse userInfoResponse = userService.userSuspension(userId);
+
+        return ResponseEntity.ok(ApiResponse.success(userId + " 회원 정지됨", userInfoResponse));
+    }
 
 }
