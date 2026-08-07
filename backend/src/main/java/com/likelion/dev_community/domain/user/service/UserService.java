@@ -6,6 +6,7 @@ import com.likelion.dev_community.domain.user.dto.userDto.UserInfoRequest;
 import com.likelion.dev_community.domain.user.dto.userDto.UserInfoResponse;
 import com.likelion.dev_community.domain.user.dto.userDto.UserPwRequest;
 import com.likelion.dev_community.domain.user.entity.User;
+import com.likelion.dev_community.domain.user.entity.UserStatus;
 import com.likelion.dev_community.domain.user.repository.RefreshTokenRepository;
 import com.likelion.dev_community.domain.user.repository.UserRepository;
 import com.likelion.dev_community.security.jwt.CookieProvider;
@@ -91,6 +92,19 @@ public class UserService {
         Page<User> allUsers = userRepository.findAll(pageable);
 
         return allUsers.map(UserInfoResponse::from);
+    }
+
+    // 유저 정지
+    @Transactional(readOnly = true)
+    public UserInfoResponse userSuspension(Long userId){
+        User user = findUserById(userId);
+
+        if(user.getStatus().equals(UserStatus.SUSPENDED))
+            throw new CustomException()
+
+        user.suspend();
+
+
     }
 
     public User findUserById(Long userId){

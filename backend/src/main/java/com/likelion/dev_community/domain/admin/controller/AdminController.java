@@ -76,6 +76,7 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success("유저 신고 누적 카운트 조회 성공",count));
     }
 
-    /*// 관리자가 특정 유저 정지 수행
-    @PatchMapping("/users/{id}/suspend")*/
+    // 관리자가 특정 유저 정지 수행
+    @PatchMapping("/users/{id}/suspend")
+
 }
