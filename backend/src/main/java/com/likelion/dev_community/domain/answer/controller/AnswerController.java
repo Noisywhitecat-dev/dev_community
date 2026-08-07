@@ -76,4 +76,15 @@ public class AnswerController {
 
         return ResponseEntity.ok(ApiResponse.success("답변 채택 완료", response));
     }
+
+    // F-14-1 채택 취소
+    @DeleteMapping("/api/answers/{answerId}/adopt")
+    public ResponseEntity<ApiResponse<AnswerResponse>> cancelAdoption(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long answerId
+    ) {
+        AnswerResponse response = answerService.cancelAdoption(userDetails.getId(), answerId);
+
+        return ResponseEntity.ok(ApiResponse.success("답변 채택 취소 완료", response));
+    }
 }

@@ -118,4 +118,27 @@ public class AnswerServiceImpl implements AnswerService {
 
         return AnswerResponse.from(answer);
     }
+
+    // F-14-1 채택 취소
+    @Override
+    public AnswerResponse cancelAdoption(Long userId, Long answerId) {
+
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "답변을 찾을 수 없습니다."));
+
+        Question question = answer.getQuestion();
+
+        if (!question.getAuthor().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "질문 작성자만 답변 채택을 취소할 수 있습니다.");
+        }
+
+        if (!answer.isAdopted()) {
+            throw new CustomException(ErrorCode.ANSWER_NOT_ADOPTED);
+        }
+
+        answer.cancelAdoption();
+        question.reopen();
+
+        return AnswerResponse.from(answer);
+    }
 }

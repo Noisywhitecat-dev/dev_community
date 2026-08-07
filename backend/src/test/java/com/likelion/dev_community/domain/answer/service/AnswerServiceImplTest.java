@@ -278,6 +278,83 @@ class AnswerServiceImplTest {
                 .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND));
     }
 
+    @Test
+    void 정상적으로_답변_채택을_취소한다() {
+        User asker = createUser(1L, "asker");
+        Question question = createQuestion(10L, asker);
+        Answer answer = createAnswer(100L, question, createUser(2L, "answerer"), "내용");
+        answer.adopt();
+        question.resolve();
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        AnswerResponse response = answerService.cancelAdoption(1L, 100L);
+
+        assertThat(response.isAdopted()).isFalse();
+        assertThat(answer.isAdopted()).isFalse();
+        assertThat(question.getStatus()).isEqualTo(QuestionStatus.OPEN);
+    }
+
+    @Test
+    void 채택되지_않은_답변을_취소하면_예외가_발생한다() {
+        User asker = createUser(1L, "asker");
+        Question question = createQuestion(10L, asker);
+        Answer answer = createAnswer(100L, question, createUser(2L, "answerer"), "내용");
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        assertThatThrownBy(() -> answerService.cancelAdoption(1L, 100L))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.ANSWER_NOT_ADOPTED));
+    }
+
+    @Test
+    void 질문_작성자가_아니면_채택_취소시_예외가_발생한다() {
+        User asker = createUser(1L, "asker");
+        Question question = createQuestion(10L, asker);
+        Answer answer = createAnswer(100L, question, createUser(2L, "answerer"), "내용");
+        answer.adopt();
+        question.resolve();
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        assertThatThrownBy(() -> answerService.cancelAdoption(999L, 100L))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN));
+        assertThat(answer.isAdopted()).isTrue();
+        assertThat(question.getStatus()).isEqualTo(QuestionStatus.RESOLVED);
+    }
+
+    @Test
+    void 존재하지_않는_답변_채택_취소시_예외가_발생한다() {
+        when(answerRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> answerService.cancelAdoption(1L, 999L))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND));
+    }
+
+    @Test
+    void 채택_취소_후_다시_채택할_수_있다() {
+        User asker = createUser(1L, "asker");
+        Question question = createQuestion(10L, asker);
+        Answer answer = createAnswer(100L, question, createUser(2L, "answerer"), "내용");
+        answer.adopt();
+        question.resolve();
+
+        when(answerRepository.findById(100L)).thenReturn(Optional.of(answer));
+
+        answerService.cancelAdoption(1L, 100L);
+        assertThat(answer.isAdopted()).isFalse();
+        assertThat(question.getStatus()).isEqualTo(QuestionStatus.OPEN);
+
+        AnswerResponse response = answerService.adoptAnswer(1L, 100L);
+
+        assertThat(response.isAdopted()).isTrue();
+        assertThat(answer.isAdopted()).isTrue();
+        assertThat(question.getStatus()).isEqualTo(QuestionStatus.RESOLVED);
+    }
+
     private User createUser(Long id, String nickname) {
         User user = User.builder()
                 .username(nickname)
