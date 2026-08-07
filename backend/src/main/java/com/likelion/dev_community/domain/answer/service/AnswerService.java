@@ -10,12 +10,12 @@ public interface AnswerService {
     // F-12
     AnswerResponse createAnswer(Long userId, Long questionId, AnswerRequest request);
 
-    // F-13
+    //
     List<AnswerResponse> readAnswers(Long questionId);
 
-    // F-14
+    // F-13
     AnswerResponse updateAnswer(Long userId, Long answerId, AnswerRequest request);
 
-    // F-14
+    // F-13
     void deleteAnswer(Long userId, Long answerId);
 }
