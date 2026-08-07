@@ -66,7 +66,7 @@ public class AuthService {
         if(user.getStatus() == UserStatus.WITHDRAWN || user.getStatus() == UserStatus.SUSPENDED)
             throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
 
-        refreshTokenRepository.deleteByUserId(user.getId());
+        refreshTokenRepository.deleteById(user.getId());
 
         String accessToken = jwtProvider.createAccessToken(user.getId(), user.getUsername(), user.getNickname(), List.of(user.getRole().name()));
         String refreshToken = jwtProvider.createRefreshToken(user.getId());
@@ -98,7 +98,7 @@ public class AuthService {
 
         Long userId = Long.valueOf(claims.getSubject());
 
-        RefreshToken savedToken = refreshTokenRepository.findByUserId(userId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_REFRESH_TOKEN));
+        RefreshToken savedToken = refreshTokenRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.INVALID_REFRESH_TOKEN));
 
         if(!savedToken.getRefreshToken().equals(refreshToken))
             throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
@@ -120,7 +120,7 @@ public class AuthService {
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        refreshTokenRepository.deleteByUserId(userId);
+        refreshTokenRepository.deleteById(userId);
     }
 
     // 아이디 중복 확인

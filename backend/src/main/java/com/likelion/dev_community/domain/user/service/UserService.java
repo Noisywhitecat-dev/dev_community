@@ -63,7 +63,7 @@ public class UserService {
 
         user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
 
-        refreshTokenRepository.deleteByUserId(userId);
+        refreshTokenRepository.deleteById(userId);
 
         ResponseCookie cookie = cookieProvider.clearCookie("refreshToken");
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -79,7 +79,7 @@ public class UserService {
 
         user.withdraw(); // 사용자 상태 withdrawn
 
-        refreshTokenRepository.deleteByUserId(userId);
+        refreshTokenRepository.deleteById(userId);
 
         ResponseCookie cookie = cookieProvider.clearCookie("refreshToken");
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
