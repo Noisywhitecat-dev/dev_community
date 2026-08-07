@@ -63,8 +63,11 @@ public class AuthService {
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword()))
             throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
 
-        if(user.getStatus() == UserStatus.WITHDRAWN || user.getStatus() == UserStatus.SUSPENDED)
-            throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
+        if(user.getStatus() == UserStatus.WITHDRAWN)
+            throw new CustomException(ErrorCode.WITHDRAWN_ACCOUNT);
+
+        if(user.getStatus() == UserStatus.SUSPENDED)
+            throw new CustomException(ErrorCode.SUSPENDED_ACCOUNT);
 
         refreshTokenRepository.deleteByUserId(user.getId());
 
