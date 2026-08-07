@@ -68,4 +68,8 @@ public class User extends BaseTimeEntity {
     public void suspend(){
         this.status = UserStatus.SUSPENDED;
     }
+
+    public void unsuspend(){
+        this.status =UserStatus.ACTIVE;
+    }
 }
