@@ -66,7 +66,7 @@ public class QuestionServiceImpl implements QuestionService {
     // F-07
     @Override
     @Transactional(readOnly = true)
-    public Page<QuestionSummaryResponse> readQuestions(int page, int size, String sort, String keyword) {
+    public Page<QuestionSummaryResponse> readQuestions(int page, int size, String sort, String keyword, String tag) {
 
         if (page < 0) {
             throw new CustomException(ErrorCode.INVALID_INPUT, "page는 0 이상이어야 합니다.");
@@ -77,11 +77,19 @@ public class QuestionServiceImpl implements QuestionService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        // F-17
+        // F-17, F-18
         Page<Question> questions;
 
-        if (keyword != null && !keyword.isBlank()) {
-            questions = questionRepository.search(keyword.trim(), pageable);
+        if (tag != null && !tag.isBlank()) {
+            String normalizedTag = tag.trim().toLowerCase();
+
+            Tag foundTag = tagRepository.findByName(normalizedTag)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "존재하지 않는 태그"));
+
+            questions = questionRepository.searchTag(foundTag.getId(), pageable);
+
+        } else if (keyword != null && !keyword.isBlank()) {
+            questions = questionRepository.searchKeyword(keyword.trim(), pageable);
         } else {
             QuestionSortType sortType = QuestionSortType.from(sort);
             questions = switch (sortType) {

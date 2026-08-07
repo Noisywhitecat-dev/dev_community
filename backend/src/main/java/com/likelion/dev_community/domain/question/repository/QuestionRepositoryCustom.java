@@ -6,5 +6,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface QuestionRepositoryCustom {
     // F-17
-    Page<Question> search(String keyword, Pageable pageable);
+    Page<Question> searchKeyword(String keyword, Pageable pageable);
+
+    // F-18
+    Page<Question> searchTag(Long tagId, Pageable pageable);
 }
