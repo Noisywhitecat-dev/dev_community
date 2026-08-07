@@ -2,6 +2,8 @@ package com.likelion.dev_community.domain.user.service;
 
 import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
+import com.likelion.dev_community.domain.answer.dto.AnswerResponse;
+import com.likelion.dev_community.domain.answer.entity.Answer;
 import com.likelion.dev_community.domain.answer.repository.AnswerRepository;
 import com.likelion.dev_community.domain.answer.repository.QuestionAnswerCount;
 import com.likelion.dev_community.domain.question.dto.QuestionSummaryResponse;
@@ -155,5 +157,13 @@ public class UserService {
                 Math.toIntExact(answerCountMap.getOrDefault(question.getId(),0L)),
                 tagMap.getOrDefault(question.getId(), Collections.emptyList())
         ));
+    }
+
+    // 내 답변 목록 조회
+    @Transactional(readOnly = true)
+    public Page<AnswerResponse> getMyAnswers(Long userId, Pageable pageable){
+        Page<Answer> myAnswers = answerRepository.findAllByAuthorIdOrderByCreatedAtDesc(userId, pageable);
+
+        return myAnswers.map(AnswerResponse::from);
     }
 }
