@@ -104,7 +104,7 @@ public class UserService {
 
         user.suspend();
 
-        refreshTokenRepository.deleteByUserId(userId);
+        refreshTokenRepository.deleteById(userId);
 
         return UserInfoResponse.from(user);
     }
