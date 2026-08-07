@@ -2,6 +2,12 @@ package com.likelion.dev_community.domain.user.service;
 
 import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
+import com.likelion.dev_community.domain.answer.repository.AnswerRepository;
+import com.likelion.dev_community.domain.answer.repository.QuestionAnswerCount;
+import com.likelion.dev_community.domain.question.dto.QuestionSummaryResponse;
+import com.likelion.dev_community.domain.question.entity.Question;
+import com.likelion.dev_community.domain.question.repository.QuestionRepository;
+import com.likelion.dev_community.domain.question.repository.QuestionTagRepository;
 import com.likelion.dev_community.domain.user.dto.userDto.UserInfoRequest;
 import com.likelion.dev_community.domain.user.dto.userDto.UserInfoResponse;
 import com.likelion.dev_community.domain.user.dto.userDto.UserPwRequest;
@@ -20,7 +26,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +39,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
     private final CookieProvider cookieProvider;
+    private final QuestionRepository questionRepository;
+    private final QuestionTagRepository questionTagRepository;
+    private final AnswerRepository answerRepository;
 
     // 회원 정보 조회
     public UserInfoResponse getUserInfo(Long userId){
@@ -111,5 +123,37 @@ public class UserService {
 
     public User findUserById(Long userId){
         return userRepository.findById(userId).orElseThrow(()->new CustomException(ErrorCode.NOT_FOUND, "유저를 찾을 수 없습니다. "+userId));
+    }
+
+    // 내 질문 목록 조회
+    @Transactional(readOnly = true)
+    public Page<QuestionSummaryResponse> getMyQuestions(Long userId, Pageable pageable){
+        Page<Question> myQuestions = questionRepository.findAllByAuthorIdOrderByCreatedAtDesc(userId, pageable);
+
+        if (myQuestions.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        List<Long> questionIds = myQuestions.getContent().stream()
+                .map(Question::getId)
+                .toList();
+
+        Map<Long, List<String>> tagMap = questionTagRepository.findByQuestionIdIn(questionIds).stream()
+                .collect(Collectors.groupingBy(
+                        qt -> qt.getQuestion().getId(),
+                        Collectors.mapping(qt -> qt.getTag().getName(), Collectors.toList())
+                ));
+
+        Map<Long, Long> answerCountMap = answerRepository.countByQuestionIdIn(questionIds).stream()
+                .collect(Collectors.toMap(
+                        QuestionAnswerCount::getQuestionId,
+                        QuestionAnswerCount::getCount
+                ));
+
+        return myQuestions.map(question -> QuestionSummaryResponse.of(
+                question,
+                Math.toIntExact(answerCountMap.getOrDefault(question.getId(),0L)),
+                tagMap.getOrDefault(question.getId(), Collections.emptyList())
+        ));
     }
 }

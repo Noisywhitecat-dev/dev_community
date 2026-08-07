@@ -4,6 +4,8 @@ import com.likelion.dev_community.common.exception.CustomException;
 import com.likelion.dev_community.common.exception.ErrorCode;
 import com.likelion.dev_community.common.viewcount.ViewCountService;
 import com.likelion.dev_community.common.xss.XssSanitizer;
+import com.likelion.dev_community.domain.answer.repository.AnswerRepository;
+import com.likelion.dev_community.domain.answer.repository.QuestionAnswerCount;
 import com.likelion.dev_community.domain.question.dto.*;
 import com.likelion.dev_community.domain.question.entity.Question;
 import com.likelion.dev_community.domain.question.entity.QuestionSortType;
@@ -30,6 +32,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     private final QuestionRepository questionRepository;
     private final QuestionTagRepository questionTagRepository;
+    private final AnswerRepository answerRepository;
     private final UserRepository userRepository;
     private final XssSanitizer xssSanitizer;
     private final ViewCountService viewCountService;
@@ -102,9 +105,15 @@ public class QuestionServiceImpl implements QuestionService {
                         Collectors.mapping(qt -> qt.getTag().getName(), Collectors.toList())
                 ));
 
+        Map<Long, Long> answerCountMap = answerRepository.countByQuestionIdIn(questionIds).stream()
+                .collect(Collectors.toMap(
+                        QuestionAnswerCount::getQuestionId,
+                        QuestionAnswerCount::getCount
+                ));
+
         return questions.map(question -> QuestionSummaryResponse.of(
                 question,
-                0, // 답변 작성 구현 후에 수정
+                Math.toIntExact(answerCountMap.getOrDefault(question.getId(), 0L)),
                 tagMap.getOrDefault(question.getId(), Collections.emptyList())
         ));
     }
