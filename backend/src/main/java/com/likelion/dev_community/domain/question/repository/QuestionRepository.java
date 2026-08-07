@@ -23,4 +23,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             "q.createdAt desc",
             countQuery = "select count(q) from Question q")
     Page<Question> findAllOrderByUnresolvedFirst(Pageable pageable);
+
+    // 내 질문 목록
+    @EntityGraph(attributePaths = "author")
+    Page<Question> findAllByAuthorIdOrderByCreatedAtDesc(Long authorId, Pageable pageable);
 }
