@@ -28,7 +28,7 @@ public class QuestionSummaryResponse {
         return new QuestionSummaryResponse(
                 question.getId(),
                 question.getTitle(),
-                question.getAuthor().getNickname(),
+                question.getAuthor().getDisplayNickname(),
                 question.getStatus(),
                 question.getViewCount(),
                 question.getLikeCount(),

@@ -24,7 +24,7 @@ public class AnswerResponse {
                 answer.getId(),
                 answer.getQuestion().getId(),
                 answer.getAuthor().getId(),
-                answer.getAuthor().getNickname(),
+                answer.getAuthor().getDisplayNickname(),
                 answer.getContent(),
                 answer.isAdopted(),
                 answer.getLikeCount(),
