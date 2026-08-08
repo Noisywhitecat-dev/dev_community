@@ -62,7 +62,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         List<String> tagNames = attachTags(question, request.getTags());
 
-        return QuestionResponse.from(question, Collections.emptyList());
+        return QuestionResponse.from(question, tagNames);
     }
 
     // F-07
@@ -173,7 +173,7 @@ public class QuestionServiceImpl implements QuestionService {
         question.deleteTags();
         List<String> tagNames = attachTags(question, request.getTags());
 
-        return QuestionResponse.from(question, Collections.emptyList());
+        return QuestionResponse.from(question, tagNames);
     }
 
     // F-09 (삭제)
